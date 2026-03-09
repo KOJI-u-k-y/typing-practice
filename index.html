@@ -209,10 +209,46 @@
                 2. 「課題ファイルを作成・編集」で.btcファイルを作成<br>
                 3. 練習画面で作成した.btcファイルを読み込んで練習
             </p>
-            <p style="margin-top: 20px;">
-                サンプル課題ファイル：<a href="sample_new.btc" download>sample_new.btc</a>
+            <div style="margin-top: 25px; padding: 20px; background: #f9f9f9; border-radius: 10px;">
+                <p style="font-weight: bold; color: #667eea; margin-bottom: 15px;">📥 サンプル課題ファイル</p>
+                <div id="sampleFiles" style="display: flex; flex-direction: column; gap: 10px;">
+                    <a href="sample_new.btc" download class="sample-file-link">
+                        📄 sample_new.btc - 初級編（ホームポジション練習）
+                    </a>
+                    <a href="sample_intermediate.btc" download class="sample-file-link">
+                        📄 sample_intermediate.btc - 中級編（日本語文章練習）
+                    </a>
+                    <a href="sample_advanced.btc" download class="sample-file-link">
+                        📄 sample_advanced.btc - 上級編（ビジネス文書練習）
+                    </a>
+                    <a href="sample_english.btc" download class="sample-file-link">
+                        📄 sample_english.btc - 英単語編（基本英単語練習）
+                    </a>
+                </div>
+            </div>
+            <p style="margin-top: 15px; font-size: 0.85em; color: #999;">
+                ※ダウンロードした.btcファイルは、練習画面やエディタで読み込めます
             </p>
         </div>
+        
+        <style>
+            .sample-file-link {
+                display: block;
+                padding: 12px 15px;
+                background: white;
+                border: 2px solid #e0e0e0;
+                border-radius: 8px;
+                color: #333;
+                text-decoration: none;
+                transition: all 0.2s;
+            }
+            
+            .sample-file-link:hover {
+                border-color: #667eea;
+                background: #f0f4ff;
+                transform: translateX(5px);
+            }
+        </style>
     </div>
 </body>
 </html>
