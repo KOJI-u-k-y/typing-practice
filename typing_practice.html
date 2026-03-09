@@ -513,6 +513,13 @@
     <div class="container">
         <h1>⌨️ ブラインドタッチ練習</h1>
         
+        <!-- ナビゲーション -->
+        <div style="text-align: center; margin-bottom: 20px;">
+            <a href="index.html" style="color: #667eea; text-decoration: none; margin: 0 10px;">🏠 ホーム</a>
+            <span style="color: #ddd;">|</span>
+            <a href="btc_editor.html" style="color: #667eea; text-decoration: none; margin: 0 10px;">📝 課題エディタ</a>
+        </div>
+        
         <!-- スタート画面 -->
         <div id="startScreen" class="start-screen">
             <h2 id="titleMessage">ブラインドタッチ練習へようこそ！</h2>
@@ -1058,6 +1065,10 @@
             
             // スタート画面の場合
             if (!practiceStarted && !document.getElementById('startScreen').classList.contains('hidden')) {
+                // Enterキーの場合はデフォルト動作を防止
+                if (key === 'Enter') {
+                    event.preventDefault();
+                }
                 startPractice();
                 return;
             }
@@ -1083,9 +1094,14 @@
             
             const targetChar = challengeText[currentPosition];
             
-            // スペースキーのデフォルト動作（ページスクロール）を防止
-            if (key === ' ') {
+            // スペースキーとEnterキーのデフォルト動作を防止
+            if (key === ' ' || key === 'Enter') {
                 event.preventDefault();
+            }
+            
+            // Enterキーは入力として扱わない（ボタンのトリガーを防ぐ）
+            if (key === 'Enter') {
+                return;
             }
             
             // 入力値表示
