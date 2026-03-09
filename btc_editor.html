@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>.btcファイルエディタ</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 800px;
+            margin: 0 auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 30px;
+            font-size: 1.8em;
+        }
+        
+        .file-header {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 15px;
+            background: #f7f7f7;
+            border-radius: 10px;
+        }
+        
+        .file-header label {
+            font-weight: bold;
+            color: #666;
+            white-space: nowrap;
+        }
+        
+        .file-header input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .file-header input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+            white-space: nowrap;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn-load {
+            background: #28a745;
+        }
+        
+        .btn-load:hover {
+            background: #218838;
+        }
+        
+        #fileInput {
+            display: none;
+        }
+        
+        .challenges {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .challenge-item {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+        }
+        
+        .challenge-header {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+        
+        .field {
+            margin-bottom: 15px;
+        }
+        
+        .field:last-child {
+            margin-bottom: 0;
+        }
+        
+        .field label {
+            display: block;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .field input,
+        .field textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            font-family: 'Noto Sans JP', sans-serif;
+        }
+        
+        .field input:focus,
+        .field textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .field textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+        
+        .actions {
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .success-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 1000;
+        }
+        
+        .success-message.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📝 .btcファイルエディタ</h1>
+        
+        <div class="file-header">
+            <label>ファイル名：</label>
+            <input type="text" id="filename" value="practice" placeholder="ファイル名を入力">
+            <span style="color: #666;">.btc</span>
+            <div class="btn-group">
+                <button class="btn btn-load" onclick="document.getElementById('fileInput').click()">📁 開く</button>
+                <button class="btn" onclick="saveFile()">💾 保存</button>
+            </div>
+            <input type="file" id="fileInput" accept=".btc,.txt" onchange="loadFile(event)">
+        </div>
+        
+        <div style="background: #f0f0f0; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+            <label style="display: block; font-weight: bold; color: #667eea; margin-bottom: 10px;">タイトル画面メッセージ：</label>
+            <input type="text" id="titleMessage" placeholder="例：初級編①" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px; font-size: 16px;">
+        </div>
+        
+        <div class="challenges" id="challenges"></div>
+        
+        <div class="actions">
+            <button class="btn" onclick="clearAll()">🗑️ 全クリア</button>
+        </div>
+    </div>
+    
+    <div class="success-message" id="successMessage">
+        ファイルを保存しました！
+    </div>
+
+    <script>
+        // 課題データの初期化
+        function initChallenges() {
+            const challengesDiv = document.getElementById('challenges');
+            challengesDiv.innerHTML = '';
+            
+            for (let i = 1; i <= 10; i++) {
+                const challengeDiv = document.createElement('div');
+                challengeDiv.className = 'challenge-item';
+                challengeDiv.innerHTML = `
+                    <div class="challenge-header">課題${i}</div>
+                    <div class="field">
+                        <label>日本語：</label>
+                        <textarea id="japanese${i}" placeholder="日本語の文章を入力"></textarea>
+                    </div>
+                    <div class="field">
+                        <label>入力キー：</label>
+                        <textarea id="romaji${i}" placeholder="ローマ字を入力"></textarea>
+                    </div>
+                    <div class="field">
+                        <label>メッセージ：</label>
+                        <input type="text" id="message${i}" placeholder="例：まずは基本から">
+                    </div>
+                `;
+                challengesDiv.appendChild(challengeDiv);
+            }
+        }
+        
+        // ファイルを保存
+        function saveFile() {
+            let content = '';
+            
+            // タイトルメッセージ
+            const title = document.getElementById('titleMessage').value.trim();
+            if (title) {
+                content += `タイトル画面メッセージ：${title}\n`;
+            }
+            
+            let hasContent = false;
+            
+            for (let i = 1; i <= 10; i++) {
+                const japanese = document.getElementById(`japanese${i}`).value.trim();
+                const romaji = document.getElementById(`romaji${i}`).value.trim();
+                const message = document.getElementById(`message${i}`).value.trim();
+                
+                if (japanese && romaji) {
+                    content += `課題${i}：\n`;
+                    content += `日本語：${japanese}\n`;
+                    content += `入力キー：${romaji}\n`;
+                    if (message) {
+                        content += `メッセージ：${message}\n`;
+                    }
+                    hasContent = true;
+                }
+            }
+            
+            if (!hasContent) {
+                alert('少なくとも1つの課題を入力してください。');
+                return;
+            }
+            
+            // ファイル名から既存の.btc拡張子を削除してから追加
+            let filename = document.getElementById('filename').value.trim() || 'practice';
+            // .btcで終わっている場合は削除
+            filename = filename.replace(/\.btc$/i, '');
+            
+            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${filename}.btc`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            // 成功メッセージを表示
+            showSuccessMessage();
+        }
+        
+        // ファイルを読み込み
+        function loadFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            // ファイル名を設定（.btc拡張子を除く）
+            const filenameWithoutExt = file.name.replace(/\.btc$/, '').replace(/\.txt$/, '');
+            document.getElementById('filename').value = filenameWithoutExt;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const content = e.target.result;
+                const lines = content.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+                
+                // 既存の入力をクリア
+                clearAll();
+                
+                let i = 0;
+                
+                // タイトル画面メッセージを読み込み
+                if (i < lines.length && lines[i].match(/^タイトル画面メッセージ[：:]/)) {
+                    const title = lines[i].replace(/^タイトル画面メッセージ[：:]\s*/, '');
+                    document.getElementById('titleMessage').value = title;
+                    i++;
+                }
+                
+                let challengeIndex = 1;
+                
+                // 課題を読み込み
+                while (i < lines.length && challengeIndex <= 10) {
+                    const line = lines[i];
+                    
+                    // 課題X：の行
+                    if (line.match(/^課題\d+[：:]/)) {
+                        i++;
+                        
+                        let japanese = '';
+                        let romaji = '';
+                        let message = '';
+                        
+                        // 日本語、入力キー、メッセージを読み込み
+                        while (i < lines.length && !lines[i].match(/^課題\d+[：:]/)) {
+                            const currentLine = lines[i];
+                            
+                            if (currentLine.match(/^日本語[：:]/)) {
+                                japanese = currentLine.replace(/^日本語[：:]\s*/, '');
+                            } else if (currentLine.match(/^入力キー[：:]/)) {
+                                romaji = currentLine.replace(/^入力キー[：:]\s*/, '');
+                            } else if (currentLine.match(/^メッセージ[：:]/)) {
+                                message = currentLine.replace(/^メッセージ[：:]\s*/, '');
+                            }
+                            
+                            i++;
+                        }
+                        
+                        // 課題をフォームに設定
+                        if (japanese && romaji) {
+                            document.getElementById(`japanese${challengeIndex}`).value = japanese;
+                            document.getElementById(`romaji${challengeIndex}`).value = romaji;
+                            document.getElementById(`message${challengeIndex}`).value = message;
+                            challengeIndex++;
+                        }
+                    } else {
+                        i++;
+                    }
+                }
+                
+                alert(`${challengeIndex - 1}個の課題を読み込みました！`);
+            };
+            reader.readAsText(file, 'UTF-8');
+            
+            // ファイル選択をリセット
+            event.target.value = '';
+        }
+        
+        // 全クリア
+        function clearAll() {
+            if (confirm('全ての入力内容をクリアしますか？')) {
+                document.getElementById('titleMessage').value = '';
+                for (let i = 1; i <= 10; i++) {
+                    document.getElementById(`japanese${i}`).value = '';
+                    document.getElementById(`romaji${i}`).value = '';
+                    document.getElementById(`message${i}`).value = '';
+                }
+            }
+        }
+        
+        // 成功メッセージを表示
+        function showSuccessMessage() {
+            const msg = document.getElementById('successMessage');
+            msg.classList.add('show');
+            setTimeout(() => {
+                msg.classList.remove('show');
+            }, 2000);
+        }
+        
+        // 初期化
+        initChallenges();
+    </script>
+</body>
+</html>

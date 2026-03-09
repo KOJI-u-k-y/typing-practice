@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ブラインドタッチ練習アプリ</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 60px 40px;
+            max-width: 700px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+        
+        h1 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+            font-weight: 900;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+            margin-bottom: 50px;
+            line-height: 1.6;
+        }
+        
+        .menu {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .menu-item {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            padding: 30px;
+            border-radius: 15px;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .menu-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .menu-item-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+            display: block;
+        }
+        
+        .menu-item-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .menu-item-description {
+            font-size: 0.95em;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+        
+        .features {
+            background: #f7f7f7;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: left;
+        }
+        
+        .features h2 {
+            color: #667eea;
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .features ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .features li {
+            padding: 10px 0;
+            color: #555;
+            position: relative;
+            padding-left: 30px;
+        }
+        
+        .features li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        
+        .footer {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #f0f0f0;
+            color: #999;
+            font-size: 0.9em;
+        }
+        
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 40px 25px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .menu-item {
+                padding: 25px;
+            }
+            
+            .menu-item-icon {
+                font-size: 2.5em;
+            }
+            
+            .menu-item-title {
+                font-size: 1.3em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⌨️ ブラインドタッチ練習</h1>
+        <p class="subtitle">
+            ブラウザで動作するタイピング練習アプリ<br>
+            課題ファイルを自由にカスタマイズできます
+        </p>
+        
+        <div class="menu">
+            <a href="typing_practice.html" class="menu-item">
+                <span class="menu-item-icon">🎮</span>
+                <div class="menu-item-title">練習を始める</div>
+                <div class="menu-item-description">
+                    キーボード表示、指ガイド、リアルタイム統計で効率的に練習
+                </div>
+            </a>
+            
+            <a href="btc_editor.html" class="menu-item">
+                <span class="menu-item-icon">📝</span>
+                <div class="menu-item-title">課題ファイルを作成・編集</div>
+                <div class="menu-item-description">
+                    オリジナルの練習課題を作成して、自分だけの練習メニューを
+                </div>
+            </a>
+        </div>
+        
+        <div class="features">
+            <h2>特徴</h2>
+            <ul>
+                <li>キーボードビジュアル表示で次に押すキーが一目瞭然</li>
+                <li>指ガイドでどの指で入力するか表示</li>
+                <li>正解・不正解をリアルタイムで色分け表示</li>
+                <li>課題ごとにカスタムメッセージを設定可能</li>
+                <li>複数の課題を連続して練習できる</li>
+                <li>詳細な統計（正確率、速度、エラー数）</li>
+                <li>完全無料・インストール不要</li>
+                <li>オフラインでも動作</li>
+            </ul>
+        </div>
+        
+        <div class="footer">
+            <p>
+                <strong>使い方：</strong><br>
+                1. 「練習を始める」で練習開始（デフォルト課題あり）<br>
+                2. 「課題ファイルを作成・編集」で.btcファイルを作成<br>
+                3. 練習画面で作成した.btcファイルを読み込んで練習
+            </p>
+            <p style="margin-top: 20px;">
+                サンプル課題ファイル：<a href="sample_new.btc" download>sample_new.btc</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

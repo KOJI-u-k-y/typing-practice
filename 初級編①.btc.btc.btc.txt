@@ -1,0 +1,17 @@
+タイトル画面メッセージ：初級編①
+課題1：
+日本語：ASDF ADFS AFSD ASDFG GASDF AGSDF ASGDF ASDGF
+入力キー：asdf adfs afsd asdfg gasdf agsdf asgdf asdgf
+メッセージ：ますは基本から　左手の動き　小a 薬s 中d 人f 人右g
+課題2：
+日本語：QWER QERW QRWE QWERT TQWER QTWER QWTER QWETR AQSWDEFRGT
+入力キー：qwer qerw qrwe qwert tqwer qtwer qwter qwetr aqswdefrgt
+メッセージ：左手上段の動き　上段 小q 薬w 中e 人r 人右t
+課題3：
+日本語：ZXCV ZCXV ZVXC ZXCVB BZXCV ZBXCV ZXBCV ZXCBV AZSXDCFVGB
+入力キー：zxcv zcxv zcvx zxcvb bzxcv zbxcv zxbcv zxcbv azsxdcfvgb
+メッセージ：左手下段の動き　下段 小z 薬x 中c 人v 人右b
+課題4：
+日本語：JKL; JL;K J;KL HJKL; JHKL; JKHL; JKLH; JKL;H
+入力キー：jkl; jl;k j;kl hjkl; jhkl; jkhl; jklh; jkl;h
+メッセージ：右手の動きをはじめます　人j 中k 薬l 小; 人左h
