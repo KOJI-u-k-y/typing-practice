@@ -232,16 +232,20 @@
                 challengeDiv.innerHTML = `
                     <div class="challenge-header">課題${i}</div>
                     <div class="field">
-                        <label>日本語：</label>
-                        <textarea id="japanese${i}" placeholder="日本語の文章を入力"></textarea>
+                        <label>本文：</label>
+                        <textarea id="mainText${i}" placeholder="漢字混じりの文章を入力（例：俺はジャイアン）"></textarea>
+                    </div>
+                    <div class="field">
+                        <label>よみがな：</label>
+                        <textarea id="japanese${i}" placeholder="ひらがなで読み方を入力（例：おれはじゃいあん）"></textarea>
                     </div>
                     <div class="field">
                         <label>入力キー：</label>
-                        <textarea id="romaji${i}" placeholder="ローマ字を入力"></textarea>
+                        <textarea id="romaji${i}" placeholder="ローマ字を入力（例：orehajaiann）"></textarea>
                     </div>
                     <div class="field">
                         <label>メッセージ：</label>
-                        <input type="text" id="message${i}" placeholder="例：まずは基本から">
+                        <input type="text" id="message${i}" placeholder="例：ジャイアンの本名">
                     </div>
                 `;
                 challengesDiv.appendChild(challengeDiv);
@@ -261,13 +265,17 @@
             let hasContent = false;
             
             for (let i = 1; i <= 10; i++) {
+                const mainText = document.getElementById(`mainText${i}`).value.trim();
                 const japanese = document.getElementById(`japanese${i}`).value.trim();
                 const romaji = document.getElementById(`romaji${i}`).value.trim();
                 const message = document.getElementById(`message${i}`).value.trim();
                 
                 if (japanese && romaji) {
                     content += `課題${i}：\n`;
-                    content += `日本語：${japanese}\n`;
+                    if (mainText) {
+                        content += `本文：${mainText}\n`;
+                    }
+                    content += `よみがな：${japanese}\n`;
                     content += `入力キー：${romaji}\n`;
                     if (message) {
                         content += `メッセージ：${message}\n`;
@@ -277,7 +285,7 @@
             }
             
             if (!hasContent) {
-                alert('少なくとも1つの課題を入力してください。');
+                alert('少なくとも1つの課題（よみがなと入力キー）を入力してください。');
                 return;
             }
             
@@ -336,16 +344,19 @@
                     if (line.match(/^課題\d+[：:]/)) {
                         i++;
                         
+                        let mainText = '';
                         let japanese = '';
                         let romaji = '';
                         let message = '';
                         
-                        // 日本語、入力キー、メッセージを読み込み
+                        // 本文、よみがな、入力キー、メッセージを読み込み
                         while (i < lines.length && !lines[i].match(/^課題\d+[：:]/)) {
                             const currentLine = lines[i];
                             
-                            if (currentLine.match(/^日本語[：:]/)) {
-                                japanese = currentLine.replace(/^日本語[：:]\s*/, '');
+                            if (currentLine.match(/^本文[：:]/)) {
+                                mainText = currentLine.replace(/^本文[：:]\s*/, '');
+                            } else if (currentLine.match(/^よみがな[：:]/)) {
+                                japanese = currentLine.replace(/^よみがな[：:]\s*/, '');
                             } else if (currentLine.match(/^入力キー[：:]/)) {
                                 romaji = currentLine.replace(/^入力キー[：:]\s*/, '');
                             } else if (currentLine.match(/^メッセージ[：:]/)) {
@@ -357,6 +368,7 @@
                         
                         // 課題をフォームに設定
                         if (japanese && romaji) {
+                            document.getElementById(`mainText${challengeIndex}`).value = mainText;
                             document.getElementById(`japanese${challengeIndex}`).value = japanese;
                             document.getElementById(`romaji${challengeIndex}`).value = romaji;
                             document.getElementById(`message${challengeIndex}`).value = message;
@@ -380,6 +392,7 @@
             if (confirm('全ての入力内容をクリアしますか？')) {
                 document.getElementById('titleMessage').value = '';
                 for (let i = 1; i <= 10; i++) {
+                    document.getElementById(`mainText${i}`).value = '';
                     document.getElementById(`japanese${i}`).value = '';
                     document.getElementById(`romaji${i}`).value = '';
                     document.getElementById(`message${i}`).value = '';
