@@ -89,6 +89,35 @@
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
         }
         
+        .key.pressed-correct {
+            background: #28a745;
+            color: white;
+            border-color: #28a745;
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+            animation: pressEffect 0.3s;
+        }
+        
+        .key.pressed-incorrect {
+            background: #dc3545;
+            color: white;
+            border-color: #dc3545;
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
+            animation: shakeEffect 0.3s;
+        }
+        
+        @keyframes pressEffect {
+            0%, 100% { transform: scale(1.1); }
+            50% { transform: scale(1.2); }
+        }
+        
+        @keyframes shakeEffect {
+            0%, 100% { transform: scale(1.1) translateX(0); }
+            25% { transform: scale(1.1) translateX(-5px); }
+            75% { transform: scale(1.1) translateX(5px); }
+        }
+        
         .key.space {
             width: 200px;
         }
@@ -150,14 +179,21 @@
         
         .challenge-text {
             font-family: 'JetBrains Mono', monospace;
-            font-size: 20px;
+            font-size: 32px;
             letter-spacing: 1px;
-            line-height: 1.5;
+            line-height: 1.8;
+            font-weight: bold;
+        }
+        
+        .challenge-text.main-text {
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 30px;
+            color: #333;
         }
         
         .challenge-text.japanese {
             font-family: 'Noto Sans JP', sans-serif;
-            font-size: 18px;
+            font-size: 28px;
         }
         
         .challenge-text .char {
@@ -553,24 +589,16 @@
                     </div>
                 </div>
                 <div class="challenge-row">
-                    <div class="challenge-row-label">日本語</div>
+                    <div class="challenge-row-label">本文</div>
+                    <div class="challenge-text main-text" id="challengeMainText"></div>
+                </div>
+                <div class="challenge-row">
+                    <div class="challenge-row-label">よみがな</div>
                     <div class="challenge-text japanese" id="challengeJapanese"></div>
                 </div>
                 <div class="challenge-row">
                     <div class="challenge-row-label">入力キー</div>
                     <div class="challenge-text" id="challengeText"></div>
-                </div>
-            </div>
-            
-            <!-- 次の文字と入力値 -->
-            <div class="info">
-                <div class="info-box">
-                    <div class="info-label">次の文字</div>
-                    <div class="info-value next-char" id="nextChar">-</div>
-                </div>
-                <div class="info-box">
-                    <div class="info-label">入力値</div>
-                    <div class="info-value" id="inputChar">-</div>
                 </div>
             </div>
             
@@ -708,18 +736,75 @@
             ' ': '両手 親指 - スペースキー',
         };
         
+        // ひらがな→ローマ字の文字数マッピング
+        const kanaToRomajiLength = {
+            // 特殊音（カタカナ系）
+            'ゔぁ': 2, 'ゔぃ': 2, 'ゔ': 2, 'ゔぇ': 2, 'ゔぉ': 2,
+            'てぃ': 4, 'でぃ': 4,
+            'ふぁ': 2, 'ふぃ': 2, 'ふぇ': 2, 'ふぉ': 2,
+            
+            // 拗音（3文字）
+            'きゃ': 3, 'きゅ': 3, 'きょ': 3,
+            'しゃ': 3, 'しゅ': 3, 'しょ': 3,
+            'ちゃ': 3, 'ちゅ': 3, 'ちょ': 3,
+            'にゃ': 3, 'にゅ': 3, 'にょ': 3,
+            'ひゃ': 3, 'ひゅ': 3, 'ひょ': 3,
+            'みゃ': 3, 'みゅ': 3, 'みょ': 3,
+            'りゃ': 3, 'りゅ': 3, 'りょ': 3,
+            'ぎゃ': 3, 'ぎゅ': 3, 'ぎょ': 3,
+            'じゃ': 2, 'じゅ': 2, 'じょ': 2, // ja, ju, jo
+            'びゃ': 3, 'びゅ': 3, 'びょ': 3,
+            'ぴゃ': 3, 'ぴゅ': 3, 'ぴょ': 3,
+            
+            // 促音
+            'っ': 0, // 次の子音を重ねるのでカウントしない
+            
+            // 撥音（文脈依存だが、入力キーから判定）
+            'ん': 1, // デフォルト1文字、nnの場合は2文字
+            
+            // 長音
+            'ー': 1,
+            
+            // 母音（1文字）
+            'あ': 1, 'い': 1, 'う': 1, 'え': 1, 'お': 1,
+            
+            // スペース
+            ' ': 1
+        };
+        
+        // デフォルトの仮名は2文字（ka, ki, ku...）
+        function getKanaRomajiLength(kana, romajiText, romajiPos) {
+            // 特殊パターンのチェック（2文字の仮名）
+            if (kanaToRomajiLength[kana]) {
+                return kanaToRomajiLength[kana];
+            }
+            
+            // 「ん」の特殊処理：入力キーがnnなら2文字
+            if (kana === 'ん') {
+                if (romajiText.substr(romajiPos, 2) === 'nn') {
+                    return 2;
+                }
+                return 1;
+            }
+            
+            // デフォルトは2文字
+            return 2;
+        }
+        
         // デフォルト課題データ
         const defaultChallenges = [
             {
-                japanese: 'テスト課題です',
-                romaji: 'tesuto kadai desu',
-                message: 'まずは練習してみましょう'
+                mainText: 'テスト課題です',
+                japanese: 'てすとかだいです',
+                romaji: 'tesutokadaidesu',
+                message: '3段表示のテスト'
             }
         ];
         
         let titleMessage = 'ブラインドタッチ練習へようこそ！';
         let challenges = [...defaultChallenges];
         let currentChallengeIndex = 0;
+        let challengeMainText = '';
         let challengeJapanese = '';
         let challengeText = '';
         let challengeMessage = '';
@@ -778,17 +863,21 @@
                         console.log(`\n--- ${line} ---`);
                         i++;
                         
+                        let mainText = '';
                         let japanese = '';
                         let romaji = '';
                         let message = '';
                         
-                        // 日本語、入力キー、メッセージを読み込み
+                        // 本文、よみがな、入力キー、メッセージを読み込み
                         while (i < lines.length && !lines[i].match(/^課題\d+[：:]/)) {
                             const currentLine = lines[i];
                             
-                            if (currentLine.match(/^日本語[：:]/)) {
-                                japanese = currentLine.replace(/^日本語[：:]\s*/, '');
-                                console.log('日本語:', japanese);
+                            if (currentLine.match(/^本文[：:]/)) {
+                                mainText = currentLine.replace(/^本文[：:]\s*/, '');
+                                console.log('本文:', mainText);
+                            } else if (currentLine.match(/^よみがな[：:]/)) {
+                                japanese = currentLine.replace(/^よみがな[：:]\s*/, '');
+                                console.log('よみがな:', japanese);
                             } else if (currentLine.match(/^入力キー[：:]/)) {
                                 romaji = currentLine.replace(/^入力キー[：:]\s*/, '');
                                 console.log('入力キー:', romaji);
@@ -800,9 +889,14 @@
                             i++;
                         }
                         
-                        // 課題を追加
+                        // 課題を追加（本文がなければよみがなを使用）
                         if (japanese && romaji) {
-                            newChallenges.push({ japanese, romaji, message: message || '' });
+                            newChallenges.push({ 
+                                mainText: mainText || japanese,
+                                japanese, 
+                                romaji, 
+                                message: message || '' 
+                            });
                             console.log('✓ 課題追加');
                         }
                     } else {
@@ -870,6 +964,7 @@
         // 課題を読み込む
         function loadChallenge(index) {
             const challenge = challenges[index];
+            challengeMainText = challenge.mainText || challenge.japanese; // 本文（なければよみがなを使用）
             challengeJapanese = challenge.japanese;
             challengeText = challenge.romaji;
             challengeMessage = challenge.message || '';
@@ -988,21 +1083,72 @@
         
         // 課題文字列表示
         function displayChallenge() {
-            // 日本語表示
+            // 本文表示（固定、色抜きなし）
+            const mainTextDiv = document.getElementById('challengeMainText');
+            mainTextDiv.textContent = challengeMainText;
+            
+            // よみがなとローマ字の対応を計算
+            let romajiPos = 0;
+            let kanaPositions = []; // 各かなに対応するローマ字の開始位置と長さ
+            
+            for (let i = 0; i < challengeJapanese.length; i++) {
+                const kana = challengeJapanese[i];
+                
+                // 2文字の特殊音をチェック
+                const kana2 = challengeJapanese.substr(i, 2);
+                let romajiLength = 0;
+                let kanaLength = 1;
+                
+                if (kanaToRomajiLength[kana2] !== undefined) {
+                    // 2文字の特殊音
+                    romajiLength = kanaToRomajiLength[kana2];
+                    kanaLength = 2;
+                } else {
+                    // 1文字
+                    romajiLength = getKanaRomajiLength(kana, challengeText, romajiPos);
+                }
+                
+                kanaPositions.push({
+                    kanaIndex: i,
+                    kanaLength: kanaLength,
+                    romajiStart: romajiPos,
+                    romajiLength: romajiLength
+                });
+                
+                romajiPos += romajiLength;
+                
+                if (kanaLength === 2) {
+                    i++; // 2文字消費した場合はスキップ
+                }
+            }
+            
+            // 現在位置に対応するかなのインデックスを計算
+            let currentKanaIndex = 0;
+            for (let i = 0; i < kanaPositions.length; i++) {
+                const pos = kanaPositions[i];
+                if (currentPosition >= pos.romajiStart && currentPosition < pos.romajiStart + pos.romajiLength) {
+                    currentKanaIndex = i;
+                    break;
+                }
+                if (currentPosition >= pos.romajiStart + pos.romajiLength) {
+                    currentKanaIndex = i + 1;
+                }
+            }
+            
+            // よみがな表示
             const japaneseDiv = document.getElementById('challengeJapanese');
             japaneseDiv.innerHTML = '';
             
-            // 入力キーの現在位置から対応する日本語部分を計算
-            // （簡易実装：文字数比率で計算）
-            const ratio = currentPosition / challengeText.length;
-            const japanesePos = Math.floor(challengeJapanese.length * ratio);
-            
-            for (let i = 0; i < challengeJapanese.length; i++) {
+            let charIndex = 0;
+            for (let i = 0; i < kanaPositions.length; i++) {
+                const pos = kanaPositions[i];
+                const kanaText = challengeJapanese.substr(pos.kanaIndex, pos.kanaLength);
+                
                 const span = document.createElement('span');
                 span.className = 'char';
-                span.textContent = challengeJapanese[i];
+                span.textContent = kanaText;
                 
-                if (i < japanesePos) {
+                if (i < currentKanaIndex) {
                     span.classList.add('typed');
                 }
                 
@@ -1032,16 +1178,14 @@
         function updateUI() {
             const currentChar = challengeText[currentPosition];
             
-            // 次の文字表示
-            const displayNext = currentChar === ' ' ? 'スペース' : (currentChar ? currentChar.toUpperCase() : '-');
-            document.getElementById('nextChar').textContent = displayNext;
-            
             // 指ガイド表示
             document.getElementById('fingerGuide').textContent = 
                 fingerGuides[currentChar] || '通常の位置';
             
-            // キーボードハイライト
-            Object.values(keyElements).forEach(key => key.classList.remove('highlight'));
+            // キーボードハイライト（次のキーのみ青く表示）
+            Object.values(keyElements).forEach(key => {
+                key.classList.remove('highlight', 'pressed-correct', 'pressed-incorrect');
+            });
             if (keyElements[currentChar]) {
                 keyElements[currentChar].classList.add('highlight');
             }
@@ -1057,6 +1201,18 @@
                 challengeMessage || 'がんばりましょう！';
             
             displayChallenge();
+        }
+        
+        // キーボードに押下フィードバックを表示
+        function showKeyPress(key, isCorrect) {
+            if (keyElements[key]) {
+                const className = isCorrect ? 'pressed-correct' : 'pressed-incorrect';
+                keyElements[key].classList.add(className);
+                
+                setTimeout(() => {
+                    keyElements[key].classList.remove(className);
+                }, 300);
+            }
         }
         
         // キー入力処理
@@ -1104,14 +1260,11 @@
                 return;
             }
             
-            // 入力値表示
-            const displayKey = key === ' ' ? 'スペース' : (key && key.length === 1 ? key.toUpperCase() : '?');
-            document.getElementById('inputChar').textContent = displayKey;
-            
             const feedback = document.getElementById('feedback');
             
             if (key === targetChar) {
                 // 正解
+                showKeyPress(key, true); // キーボードに緑の押下フィードバック
                 feedback.className = 'feedback correct';
                 feedback.textContent = '◎ 正解！';
                 correctCount++;
@@ -1129,6 +1282,7 @@
                 }, 300);
             } else {
                 // 不正解
+                showKeyPress(key, false); // キーボードに赤の押下フィードバック
                 feedback.className = 'feedback incorrect';
                 feedback.textContent = '✗ 不正解！もう一度';
                 incorrectCount++;
