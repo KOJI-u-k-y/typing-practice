@@ -1,25 +1,26 @@
-タイトル画面メッセージ：初級編① - ホームポジション練習
+タイトル画面メッセージ：3段表示 - 本文・よみがな・ローマ字
 課題1：
-日本語：ASDF ASDF ASDF
-入力キー：asdf asdf asdf
-メッセージ：まずは基本から 左手ホームポジション
+本文：俺はジャイアン 本名剛田武
+よみがな：おれはじゃいあん ほんみょうごうだたけし
+入力キー：orehajaiann honmyougoudatakesi
+メッセージ：ジャイアンの本名を覚えよう
 課題2：
-日本語：JKL; JKL; JKL;
-入力キー：jkl; jkl; jkl;
-メッセージ：右手ホームポジション
+本文：中国ドラマ北京ヴァイオリン
+よみがな：ちゅうごくどらまぺきんゔぁいおりん
+入力キー：tyuugokudoramapekinvaiolin
+メッセージ：ヴァはvaで入力
 課題3：
-日本語：ASDF JKL; ASDF JKL;
-入力キー：asdf jkl; asdf jkl;
-メッセージ：両手を使って練習しましょう
+本文：パーティーでディナー
+よみがな：ぱーてぃーででぃなー
+入力キー：pa-teli-deddelina-
+メッセージ：ティ=teli、ディ=deli
 課題4：
-日本語：朝日新聞 読売新聞 毎日新聞
-入力キー：asahisinbun yomiurisinbun mainitisinbun
-メッセージ：新聞名を入力してみよう
+本文：こんにちは みんな
+よみがな：こんにちは みんな
+入力キー：konnnitiha minnna
+メッセージ：んはnn(2文字)で入力
 課題5：
-日本語：こんにちは 今日は良い天気ですね
-入力キー：konnitiha kyouha yoi tenki desune
-メッセージ：日常会話の練習です
-課題6：
-日本語：速く正確に入力できるようになりたい
-入力キー：hayaku seikakuni nyuuryoku dekiru youni naritai
-メッセージ：スピードよりも正確さを意識しましょう
+本文：小鳥遊さんは主水之助で蔵人
+よみがな：たかなしさんはもんどのすけでくろうど
+入力キー：takanasisanhaamondnosukedekuroudo
+メッセージ：難読漢字も練習できます
