@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ブラインドタッチ練習アプリ</title>
+    <title>ブラインドタッチ練習</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Noto+Sans+JP:wght@400;700&display=swap');
         
         * {
             margin: 0;
@@ -26,229 +26,1279 @@
         .container {
             background: white;
             border-radius: 20px;
-            padding: 60px 40px;
-            max-width: 700px;
+            padding: 40px;
+            max-width: 900px;
             width: 100%;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            text-align: center;
         }
         
         h1 {
+            text-align: center;
             color: #667eea;
-            margin-bottom: 20px;
-            font-size: 2.5em;
-            font-weight: 900;
+            margin-bottom: 30px;
+            font-size: 2em;
         }
         
-        .subtitle {
-            color: #666;
-            font-size: 1.1em;
-            margin-bottom: 50px;
-            line-height: 1.6;
+        /* キーボード表示 */
+        .keyboard {
+            background: #f7f7f7;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
         }
         
-        .menu {
+        .keyboard-row {
             display: flex;
-            flex-direction: column;
-            gap: 20px;
-            margin-bottom: 40px;
+            justify-content: center;
+            gap: 5px;
+            margin-bottom: 5px;
         }
         
-        .menu-item {
+        .keyboard-row:nth-child(2) {
+            padding-left: 20px;
+        }
+        
+        .keyboard-row:nth-child(3) {
+            padding-left: 40px;
+        }
+        
+        .keyboard-row:nth-child(4) {
+            padding-left: 60px;
+        }
+        
+        .key {
+            width: 45px;
+            height: 45px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: bold;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+        
+        .key.highlight {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .key.pressed-correct {
+            background: #28a745;
+            color: white;
+            border-color: #28a745;
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+            animation: pressEffect 0.3s;
+        }
+        
+        .key.pressed-incorrect {
+            background: #dc3545;
+            color: white;
+            border-color: #dc3545;
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
+            animation: shakeEffect 0.3s;
+        }
+        
+        @keyframes pressEffect {
+            0%, 100% { transform: scale(1.1); }
+            50% { transform: scale(1.2); }
+        }
+        
+        @keyframes shakeEffect {
+            0%, 100% { transform: scale(1.1) translateX(0); }
+            25% { transform: scale(1.1) translateX(-5px); }
+            75% { transform: scale(1.1) translateX(5px); }
+        }
+        
+        .key.space {
+            width: 200px;
+        }
+        
+        /* 課題文字列 */
+        .challenge {
+            background: #f0f0f0;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .challenge-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .challenge-label {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .challenge-controls {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-small {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 5px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-small:hover {
+            background: #5568d3;
+            transform: translateY(-1px);
+        }
+        
+        #fileInput {
+            display: none;
+        }
+        
+        .challenge-row {
+            margin-bottom: 10px;
+        }
+        
+        .challenge-row-label {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 3px;
+        }
+        
+        .challenge-text {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 32px;
+            letter-spacing: 1px;
+            line-height: 1.8;
+            font-weight: bold;
+        }
+        
+        .challenge-text.main-text {
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 30px;
+            color: #333;
+        }
+        
+        .challenge-text.japanese {
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 28px;
+        }
+        
+        .challenge-text .char {
+            display: inline-block;
+            padding: 2px;
+        }
+        
+        .challenge-text .char.typed {
+            color: #ccc;
+        }
+        
+        .challenge-text .char.current {
+            background: #fff3cd;
+            border-radius: 3px;
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        /* 情報表示 */
+        .info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .info-box {
+            background: #f7f7f7;
+            padding: 15px;
+            border-radius: 10px;
+        }
+        
+        .info-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .info-value {
+            font-size: 28px;
+            font-weight: bold;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .info-value.next-char {
+            color: #667eea;
+        }
+        
+        /* 入力フィードバック */
+        .feedback {
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            min-height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .feedback.correct {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .feedback.incorrect {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        /* 指ガイド */
+        .finger-guide {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            text-decoration: none;
-            padding: 30px;
-            border-radius: 15px;
-            transition: all 0.3s;
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
         }
         
-        .menu-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        .finger-guide-label {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 5px;
         }
         
-        .menu-item-icon {
-            font-size: 3em;
-            margin-bottom: 15px;
-            display: block;
+        .finger-guide-text {
+            font-size: 20px;
+            font-weight: bold;
         }
         
-        .menu-item-title {
-            font-size: 1.5em;
+        /* 特殊キー表示 */
+        .special-keys {
+            background: #fff3e0;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .special-keys-title {
+            font-size: 14px;
+            color: #e65100;
             font-weight: bold;
             margin-bottom: 10px;
         }
         
-        .menu-item-description {
-            font-size: 0.95em;
-            opacity: 0.9;
-            line-height: 1.5;
+        .special-keys-list {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
         }
         
-        .features {
-            background: #f7f7f7;
-            padding: 30px;
-            border-radius: 15px;
-            text-align: left;
-        }
-        
-        .features h2 {
-            color: #667eea;
-            font-size: 1.3em;
-            margin-bottom: 20px;
+        .special-key-item {
+            background: white;
+            border: 2px solid #ffb74d;
+            border-radius: 5px;
+            padding: 8px 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            min-width: 70px;
             text-align: center;
         }
         
-        .features ul {
-            list-style: none;
-            padding: 0;
-        }
-        
-        .features li {
-            padding: 10px 0;
-            color: #555;
-            position: relative;
-            padding-left: 30px;
-        }
-        
-        .features li:before {
-            content: "✓";
-            position: absolute;
-            left: 0;
-            color: #667eea;
+        .special-key-char {
+            font-size: 18px;
             font-weight: bold;
+            color: #e65100;
+            margin-right: 5px;
+        }
+        
+        /* 統計 */
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            padding: 15px;
+            background: #f7f7f7;
+            border-radius: 10px;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .stat-value.correct {
+            color: #28a745;
+        }
+        
+        .stat-value.incorrect {
+            color: #dc3545;
+        }
+        
+        .challenge-message {
+            background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 15px;
+            font-size: 16px;
+            font-weight: bold;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* 結果画面 */
+        .result {
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .result h2 {
+            color: #667eea;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+        
+        .result-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .result-stat {
+            background: #f7f7f7;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        
+        .result-stat-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .result-stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #28a745;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 1000;
+            font-weight: bold;
+        }
+        
+        .notification.show {
+            opacity: 1;
+        }
+        
+        .notification.error {
+            background: #dc3545;
+        }
+        
+        .start-screen {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        
+        .start-screen h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+        
+        .start-screen p {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        .loading {
+            display: none;
+            color: #667eea;
+            font-size: 1.1em;
+            margin-bottom: 20px;
+        }
+        
+        .loading.show {
+            display: block;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            vertical-align: middle;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .ready-message {
+            display: none;
+        }
+        
+        .ready-message.show {
+            display: block;
+        }
+        
+        .header-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .challenge-number {
+            font-size: 18px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .btn-end {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-end:hover {
+            background: #c82333;
+            transform: translateY(-1px);
+        }
+        
+        .clear-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        .clear-screen h2 {
+            color: #28a745;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+        
+        .clear-screen p {
+            color: #666;
+            margin-bottom: 30px;
             font-size: 1.2em;
         }
         
-        .footer {
-            margin-top: 40px;
-            padding-top: 30px;
-            border-top: 2px solid #f0f0f0;
-            color: #999;
-            font-size: 0.9em;
+        .clear-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+            text-align: left;
         }
         
-        .footer a {
+        .clear-stat {
+            background: #f7f7f7;
+            padding: 15px;
+            border-radius: 10px;
+        }
+        
+        .clear-stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .clear-stat-value {
+            font-size: 20px;
+            font-weight: bold;
             color: #667eea;
-            text-decoration: none;
-        }
-        
-        .footer a:hover {
-            text-decoration: underline;
-        }
-        
-        @media (max-width: 600px) {
-            .container {
-                padding: 40px 25px;
-            }
-            
-            h1 {
-                font-size: 2em;
-            }
-            
-            .menu-item {
-                padding: 25px;
-            }
-            
-            .menu-item-icon {
-                font-size: 2.5em;
-            }
-            
-            .menu-item-title {
-                font-size: 1.3em;
-            }
         }
     </style>
 </head>
 <body>
+    <div class="notification" id="notification"></div>
+    
     <div class="container">
         <h1>⌨️ ブラインドタッチ練習</h1>
-        <p class="subtitle">
-            ブラウザで動作するタイピング練習アプリ<br>
-            課題ファイルを自由にカスタマイズできます
-        </p>
         
-        <div class="menu">
-            <a href="typing_practice.html" class="menu-item">
-                <span class="menu-item-icon">🎮</span>
-                <div class="menu-item-title">練習を始める</div>
-                <div class="menu-item-description">
-                    キーボード表示、指ガイド、リアルタイム統計で効率的に練習
-                </div>
-            </a>
+        <!-- ナビゲーション -->
+        <div style="text-align: center; margin-bottom: 20px;">
+            <a href="index.html" style="color: #667eea; text-decoration: none; margin: 0 10px;">🏠 ホーム</a>
+            <span style="color: #ddd;">|</span>
+            <a href="btc_editor.html" style="color: #667eea; text-decoration: none; margin: 0 10px;">📝 課題エディタ</a>
+        </div>
+        
+        <!-- スタート画面 -->
+        <div id="startScreen" class="start-screen">
+            <h2 id="titleMessage">ブラインドタッチ練習へようこそ！</h2>
+            <div class="loading" id="loadingMessage">
+                <div class="loading-spinner"></div>
+                準備中です しばらくお待ちください...
+            </div>
+            <p class="ready-message show" id="readyMessage">何かキーを押すと練習が始まります</p>
+            <div style="margin-top: 30px;">
+                <button class="btn-small" onclick="document.getElementById('fileInputStart').click()">📁 課題ファイル読込</button>
+                <input type="file" id="fileInputStart" accept=".btc,.txt" onchange="loadChallengeFile(event)" style="display: none;">
+            </div>
+        </div>
+        
+        <div id="gameArea" class="hidden">
+            <!-- ヘッダーコントロール -->
+            <div class="header-controls">
+                <div class="challenge-number" id="challengeNumber">課題 1</div>
+                <button class="btn-end" onclick="endPractice()">練習終了</button>
+            </div>
+            <!-- キーボード表示 -->
+            <div class="keyboard" id="keyboard"></div>
             
-            <a href="btc_editor.html" class="menu-item">
-                <span class="menu-item-icon">📝</span>
-                <div class="menu-item-title">課題ファイルを作成・編集</div>
-                <div class="menu-item-description">
-                    オリジナルの練習課題を作成して、自分だけの練習メニューを
+            <!-- 課題文字列 -->
+            <div class="challenge">
+                <div class="challenge-header">
+                    <div class="challenge-label">課題文字列</div>
+                    <div class="challenge-controls">
+                        <button class="btn-small" onclick="document.getElementById('fileInput').click()">📁 ファイル読込</button>
+                        <input type="file" id="fileInput" accept=".btc,.txt" onchange="loadChallengeFile(event)">
+                    </div>
                 </div>
-            </a>
-        </div>
-        
-        <div class="features">
-            <h2>特徴</h2>
-            <ul>
-                <li>キーボードビジュアル表示で次に押すキーが一目瞭然</li>
-                <li>指ガイドでどの指で入力するか表示</li>
-                <li>正解・不正解をリアルタイムで色分け表示</li>
-                <li>課題ごとにカスタムメッセージを設定可能</li>
-                <li>複数の課題を連続して練習できる</li>
-                <li>詳細な統計（正確率、速度、エラー数）</li>
-                <li>完全無料・インストール不要</li>
-                <li>オフラインでも動作</li>
-            </ul>
-        </div>
-        
-        <div class="footer">
-            <p>
-                <strong>使い方：</strong><br>
-                1. 「練習を始める」で練習開始（デフォルト課題あり）<br>
-                2. 「課題ファイルを作成・編集」で.btcファイルを作成<br>
-                3. 練習画面で作成した.btcファイルを読み込んで練習
-            </p>
-            <div style="margin-top: 25px; padding: 20px; background: #f9f9f9; border-radius: 10px;">
-                <p style="font-weight: bold; color: #667eea; margin-bottom: 15px;">📥 サンプル課題ファイル</p>
-                <div id="sampleFiles" style="display: flex; flex-direction: column; gap: 10px;">
-                    <a href="sample_new.btc" download class="sample-file-link">
-                        📄 sample_new.btc - 初級編（ホームポジション練習）
-                    </a>
-                    <a href="sample_intermediate.btc" download class="sample-file-link">
-                        📄 sample_intermediate.btc - 中級編（日本語文章練習）
-                    </a>
-                    <a href="sample_advanced.btc" download class="sample-file-link">
-                        📄 sample_advanced.btc - 上級編（ビジネス文書練習）
-                    </a>
-                    <a href="sample_english.btc" download class="sample-file-link">
-                        📄 sample_english.btc - 英単語編（基本英単語練習）
-                    </a>
+                <div class="challenge-row">
+                    <div class="challenge-row-label">本文</div>
+                    <div class="challenge-text main-text" id="challengeMainText"></div>
+                </div>
+                <div class="challenge-row">
+                    <div class="challenge-row-label">よみがな</div>
+                    <div class="challenge-text japanese" id="challengeJapanese"></div>
+                </div>
+                <div class="challenge-row">
+                    <div class="challenge-row-label">入力キー</div>
+                    <div class="challenge-text" id="challengeText"></div>
                 </div>
             </div>
-            <p style="margin-top: 15px; font-size: 0.85em; color: #999;">
-                ※ダウンロードした.btcファイルは、練習画面やエディタで読み込めます
-            </p>
+            
+            <!-- フィードバック -->
+            <div class="feedback" id="feedback"></div>
+            
+            <!-- 特殊キー表示 -->
+            <div class="special-keys">
+                <div class="special-keys-title">特殊キー</div>
+                <div class="special-keys-list">
+                    <div class="special-key-item">
+                        <span class="special-key-char">ー</span> 0の右隣
+                    </div>
+                    <div class="special-key-item">
+                        <span class="special-key-char">、</span> Mの右
+                    </div>
+                    <div class="special-key-item">
+                        <span class="special-key-char">。</span> 、の右
+                    </div>
+                    <div class="special-key-item">
+                        <span class="special-key-char">「」</span> Pの右
+                    </div>
+                    <div class="special-key-item">
+                        <span class="special-key-char">・</span> /
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 指ガイド -->
+            <div class="finger-guide">
+                <div class="finger-guide-label">指ガイド</div>
+                <div class="finger-guide-text" id="fingerGuide">-</div>
+            </div>
+            
+            <!-- 統計 -->
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-label">正解</div>
+                    <div class="stat-value correct" id="correctCount">0</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">不正解</div>
+                    <div class="stat-value incorrect" id="incorrectCount">0</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">進捗</div>
+                    <div class="stat-value" id="progress">0/0</div>
+                </div>
+            </div>
+            
+            <!-- 課題メッセージ -->
+            <div class="challenge-message" id="challengeMessage"></div>
         </div>
         
-        <style>
-            .sample-file-link {
-                display: block;
-                padding: 12px 15px;
-                background: white;
-                border: 2px solid #e0e0e0;
-                border-radius: 8px;
-                color: #333;
-                text-decoration: none;
-                transition: all 0.2s;
+        <!-- 課題クリア画面 -->
+        <div id="clearScreen" class="hidden">
+            <div class="clear-screen">
+                <h2>🎉 課題クリア！</h2>
+                <p>この課題の成績</p>
+                <div class="clear-stats">
+                    <div class="clear-stat">
+                        <div class="clear-stat-label">所要時間</div>
+                        <div class="clear-stat-value" id="clearTime">0秒</div>
+                    </div>
+                    <div class="clear-stat">
+                        <div class="clear-stat-label">正解数</div>
+                        <div class="clear-stat-value" id="clearCorrect">0</div>
+                    </div>
+                    <div class="clear-stat">
+                        <div class="clear-stat-label">不正解数</div>
+                        <div class="clear-stat-value" id="clearIncorrect">0</div>
+                    </div>
+                    <div class="clear-stat">
+                        <div class="clear-stat-label">正確率</div>
+                        <div class="clear-stat-value" id="clearAccuracy">0%</div>
+                    </div>
+                </div>
+                <p style="color: #667eea; font-size: 1.1em; margin-bottom: 20px;">
+                    Enterキーで次の課題へ
+                </p>
+                <button onclick="endPractice()">練習終了</button>
+            </div>
+        </div>
+        
+        <!-- 結果画面 -->
+        <div id="resultArea" class="hidden">
+            <div class="result">
+                <h2>🎉 練習終了！</h2>
+                <div class="result-stats">
+                    <div class="result-stat">
+                        <div class="result-stat-label">クリアした課題数</div>
+                        <div class="result-stat-value" id="resultChallenges">0</div>
+                    </div>
+                    <div class="result-stat">
+                        <div class="result-stat-label">総所要時間</div>
+                        <div class="result-stat-value" id="resultTime">0秒</div>
+                    </div>
+                    <div class="result-stat">
+                        <div class="result-stat-label">総正解数</div>
+                        <div class="result-stat-value" id="resultCorrect">0</div>
+                    </div>
+                    <div class="result-stat">
+                        <div class="result-stat-label">総不正解数</div>
+                        <div class="result-stat-value" id="resultIncorrect">0</div>
+                    </div>
+                    <div class="result-stat">
+                        <div class="result-stat-label">全体の正確率</div>
+                        <div class="result-stat-value" id="resultAccuracy">0%</div>
+                    </div>
+                </div>
+                <button onclick="location.reload()">もう一度練習</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // キーボードレイアウト
+        const keyboardLayout = [
+            ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
+            ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
+            ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';'],
+            ['z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/']
+        ];
+        
+        // 指ガイド情報
+        const fingerGuides = {
+            'a': '左手 小指 - ホームポジション',
+            's': '左手 薬指 - ホームポジション',
+            'd': '左手 中指 - ホームポジション',
+            'f': '左手 人差し指 - ホームポジション',
+            'g': '左手 人差し指 - 右のキー',
+            'h': '右手 人差し指 - ホームポジション',
+            'j': '右手 人差し指 - ホームポジション',
+            'k': '右手 中指 - ホームポジション',
+            'l': '右手 薬指 - ホームポジション',
+            ';': '右手 小指 - ホームポジション',
+            'q': '左手 小指 - 上のキー',
+            'w': '左手 薬指 - 上のキー',
+            'e': '左手 中指 - 上のキー',
+            'r': '左手 人差し指 - 上のキー',
+            't': '左手 人差し指 - 右上のキー',
+            'y': '右手 人差し指 - 左上のキー',
+            'u': '右手 人差し指 - 上のキー',
+            'i': '右手 中指 - 上のキー',
+            'o': '右手 薬指 - 上のキー',
+            'p': '右手 小指 - 上のキー',
+            'z': '左手 小指 - 下のキー',
+            'x': '左手 薬指 - 下のキー',
+            'c': '左手 中指 - 下のキー',
+            'v': '左手 人差し指 - 下のキー',
+            'b': '左手 人差し指 - 右下のキー',
+            'n': '右手 人差し指 - 左下のキー',
+            'm': '右手 人差し指 - 下のキー',
+            ',': '右手 中指 - 下のキー',
+            '.': '右手 薬指 - 下のキー',
+            '/': '右手 小指 - 下のキー',
+            ' ': '両手 親指 - スペースキー',
+        };
+        
+        // デフォルト課題データ
+        const defaultChallenges = [
+            {
+                mainText: 'テスト課題です',
+                japanese: 'てすとかだいです',
+                romaji: 'te su to  ka da i de su',
+                message: 'スペース区切りのテスト'
+            }
+        ];
+        
+        let titleMessage = 'ブラインドタッチ練習へようこそ！';
+        let challenges = [...defaultChallenges];
+        let currentChallengeIndex = 0;
+        let challengeMainText = '';
+        let challengeJapanese = '';
+        let challengeRomaji = ''; // スペース付きローマ字
+        let challengeText = ''; // スペースを除去した入力用テキスト
+        let challengeMessage = '';
+        let currentPosition = 0;
+        let correctCount = 0;
+        let incorrectCount = 0;
+        let startTime = Date.now();
+        let keyElements = {};
+        
+        // 総計
+        let totalChallengesCleared = 0;
+        let totalCorrect = 0;
+        let totalIncorrect = 0;
+        let totalStartTime = 0;
+        let practiceStarted = false;
+        let challengeStartTime = 0;
+        
+        // 課題ファイル読み込み
+        function loadChallengeFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            // ローディング表示
+            showLoading();
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const content = e.target.result;
+                console.log('=== ファイル読み込み開始 ===');
+                console.log('ファイル内容:', content);
+                
+                // 改行で分割し、空行を除去
+                const allLines = content.split('\n');
+                const lines = allLines.map(line => line.trim()).filter(line => line.length > 0);
+                
+                console.log('有効行数:', lines.length);
+                
+                const newChallenges = [];
+                let newTitleMessage = 'ブラインドタッチ練習へようこそ！';
+                
+                let i = 0;
+                
+                // タイトル画面メッセージを読み込み
+                if (i < lines.length && lines[i].match(/^タイトル画面メッセージ[：:]/)) {
+                    newTitleMessage = lines[i].replace(/^タイトル画面メッセージ[：:]\s*/, '');
+                    console.log('タイトル:', newTitleMessage);
+                    i++;
+                }
+                
+                // 課題を読み込み
+                while (i < lines.length) {
+                    const line = lines[i];
+                    
+                    // 課題X：の行
+                    if (line.match(/^課題\d+[：:]/)) {
+                        console.log(`\n--- ${line} ---`);
+                        i++;
+                        
+                        let mainText = '';
+                        let japanese = '';
+                        let romaji = '';
+                        let message = '';
+                        
+                        // 本文、よみがな、入力キー、メッセージを読み込み
+                        while (i < lines.length && !lines[i].match(/^課題\d+[：:]/)) {
+                            const currentLine = lines[i];
+                            
+                            if (currentLine.match(/^本文[：:]/)) {
+                                mainText = currentLine.replace(/^本文[：:]\s*/, '');
+                                console.log('本文:', mainText);
+                            } else if (currentLine.match(/^よみがな[：:]/)) {
+                                japanese = currentLine.replace(/^よみがな[：:]\s*/, '');
+                                console.log('よみがな:', japanese);
+                            } else if (currentLine.match(/^入力キー[：:]/)) {
+                                romaji = currentLine.replace(/^入力キー[：:]\s*/, '');
+                                console.log('入力キー:', romaji);
+                            } else if (currentLine.match(/^メッセージ[：:]/)) {
+                                message = currentLine.replace(/^メッセージ[：:]\s*/, '');
+                                console.log('メッセージ:', message);
+                            }
+                            
+                            i++;
+                        }
+                        
+                        // 課題を追加（本文がなければよみがなを使用）
+                        if (japanese && romaji) {
+                            newChallenges.push({ 
+                                mainText: mainText || japanese,
+                                japanese, 
+                                romaji, 
+                                message: message || '' 
+                            });
+                            console.log('✓ 課題追加');
+                        }
+                    } else {
+                        i++;
+                    }
+                }
+                
+                console.log('\n=== 読み込み完了 ===');
+                console.log('タイトル:', newTitleMessage);
+                console.log('読み込んだ課題数:', newChallenges.length);
+                console.log('課題一覧:', newChallenges);
+                
+                if (newChallenges.length > 0) {
+                    titleMessage = newTitleMessage;
+                    challenges = newChallenges;
+                    currentChallengeIndex = 0;
+                    
+                    // タイトル表示を更新
+                    document.getElementById('titleMessage').textContent = titleMessage;
+                    
+                    // ローディング非表示 & 準備完了表示
+                    hideLoading();
+                    
+                    showNotification(`${newChallenges.length}個の課題を読み込みました！`);
+                    
+                    // 既に練習開始している場合は最初の課題を読み込む
+                    if (practiceStarted) {
+                        loadChallenge(0);
+                    }
+                } else {
+                    hideLoading();
+                    showNotification('ファイルの形式が正しくありません', true);
+                }
+            };
+            reader.readAsText(file, 'UTF-8');
+            
+            // ファイル選択をリセット（同じファイルを再選択可能にする）
+            event.target.value = '';
+        }
+        
+        // ローディング表示
+        function showLoading() {
+            document.getElementById('loadingMessage').classList.add('show');
+            document.getElementById('readyMessage').classList.remove('show');
+        }
+        
+        // ローディング非表示
+        function hideLoading() {
+            document.getElementById('loadingMessage').classList.remove('show');
+            document.getElementById('readyMessage').classList.add('show');
+        }
+        
+        // 通知表示
+        function showNotification(message, isError = false) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.toggle('error', isError);
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        // 課題を読み込む
+        function loadChallenge(index) {
+            const challenge = challenges[index];
+            challengeMainText = challenge.mainText || challenge.japanese;
+            challengeJapanese = challenge.japanese;
+            challengeRomaji = challenge.romaji; // スペースと/付き
+            challengeText = challengeRomaji.replace(/ /g, '').replace(/\//g, ' '); // スペース削除、/を実スペースに
+            challengeMessage = challenge.message || '';
+            currentPosition = 0;
+            correctCount = 0;
+            incorrectCount = 0;
+            challengeStartTime = Date.now();
+            
+            document.getElementById('challengeNumber').textContent = 
+                `課題 ${index + 1} / ${challenges.length}`;
+            
+            updateUI();
+        }
+        
+        // 練習開始
+        function startPractice() {
+            if (practiceStarted) return;
+            
+            practiceStarted = true;
+            totalStartTime = Date.now();
+            
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('gameArea').classList.remove('hidden');
+            
+            loadChallenge(0);
+        }
+        
+        // 課題クリア
+        function clearChallenge() {
+            const challengeEndTime = Date.now();
+            const elapsed = Math.floor((challengeEndTime - challengeStartTime) / 1000);
+            const accuracy = ((correctCount / (correctCount + incorrectCount)) * 100).toFixed(1);
+            
+            // 総計に追加
+            totalChallengesCleared++;
+            totalCorrect += correctCount;
+            totalIncorrect += incorrectCount;
+            
+            // クリア画面を表示
+            document.getElementById('gameArea').classList.add('hidden');
+            document.getElementById('clearScreen').classList.remove('hidden');
+            
+            document.getElementById('clearTime').textContent = elapsed + '秒';
+            document.getElementById('clearCorrect').textContent = correctCount;
+            document.getElementById('clearIncorrect').textContent = incorrectCount;
+            document.getElementById('clearAccuracy').textContent = accuracy + '%';
+        }
+        
+        // 次の課題へ
+        function nextChallenge() {
+            currentChallengeIndex++;
+            
+            if (currentChallengeIndex >= challenges.length) {
+                // 全課題クリア
+                currentChallengeIndex = 0; // ループ
             }
             
-            .sample-file-link:hover {
-                border-color: #667eea;
-                background: #f0f4ff;
-                transform: translateX(5px);
+            document.getElementById('clearScreen').classList.add('hidden');
+            document.getElementById('gameArea').classList.remove('hidden');
+            
+            loadChallenge(currentChallengeIndex);
+        }
+        
+        // 練習終了
+        function endPractice() {
+            const totalEndTime = Date.now();
+            const totalElapsed = Math.floor((totalEndTime - totalStartTime) / 1000);
+            const totalAccuracy = totalCorrect + totalIncorrect > 0 
+                ? ((totalCorrect / (totalCorrect + totalIncorrect)) * 100).toFixed(1)
+                : 0;
+            
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('gameArea').classList.add('hidden');
+            document.getElementById('clearScreen').classList.add('hidden');
+            document.getElementById('resultArea').classList.remove('hidden');
+            
+            document.getElementById('resultChallenges').textContent = totalChallengesCleared;
+            document.getElementById('resultTime').textContent = totalElapsed + '秒';
+            document.getElementById('resultCorrect').textContent = totalCorrect;
+            document.getElementById('resultIncorrect').textContent = totalIncorrect;
+            document.getElementById('resultAccuracy').textContent = totalAccuracy + '%';
+        }
+        
+        // キーボード描画
+        function drawKeyboard() {
+            const keyboard = document.getElementById('keyboard');
+            keyboard.innerHTML = '';
+            
+            keyboardLayout.forEach(row => {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'keyboard-row';
+                
+                row.forEach(key => {
+                    const keyDiv = document.createElement('div');
+                    keyDiv.className = 'key';
+                    keyDiv.textContent = key.toUpperCase();
+                    keyDiv.dataset.key = key;
+                    keyElements[key] = keyDiv;
+                    rowDiv.appendChild(keyDiv);
+                });
+                
+                keyboard.appendChild(rowDiv);
+            });
+            
+            // スペースキー
+            const spaceRow = document.createElement('div');
+            spaceRow.className = 'keyboard-row';
+            const spaceKey = document.createElement('div');
+            spaceKey.className = 'key space';
+            spaceKey.textContent = 'SPACE';
+            spaceKey.dataset.key = ' ';
+            keyElements[' '] = spaceKey;
+            spaceRow.appendChild(spaceKey);
+            keyboard.appendChild(spaceRow);
+        }
+        
+        // 課題文字列表示
+        function displayChallenge() {
+            // 本文表示（固定、色抜きなし）
+            const mainTextDiv = document.getElementById('challengeMainText');
+            mainTextDiv.textContent = challengeMainText;
+            
+            // 入力キーをスペースで分割（/は含まない）
+            const romajiParts = challengeRomaji.split(/[\s\/]+/).filter(p => p); // スペースと/で分割
+            const kanaChars = challengeJapanese.split(''); // よみがなを1文字ずつ
+            
+            // 現在何文字目まで入力したか計算
+            let totalChars = 0;
+            let completedParts = 0;
+            
+            for (let i = 0; i < romajiParts.length; i++) {
+                if (currentPosition >= totalChars + romajiParts[i].length) {
+                    completedParts++;
+                    totalChars += romajiParts[i].length;
+                    
+                    // パートの後にスペース(/)がある場合は+1
+                    const partEnd = challengeRomaji.indexOf(romajiParts[i]) + romajiParts[i].length;
+                    if (partEnd < challengeRomaji.length && challengeRomaji[partEnd] === '/') {
+                        if (currentPosition >= totalChars + 1) {
+                            totalChars += 1; // /（スペース）の分
+                        }
+                    }
+                } else {
+                    break;
+                }
             }
-        </style>
-    </div>
+            
+            // よみがな表示（completedParts文字だけ色抜き）
+            const japaneseDiv = document.getElementById('challengeJapanese');
+            japaneseDiv.innerHTML = '';
+            
+            for (let i = 0; i < kanaChars.length; i++) {
+                const span = document.createElement('span');
+                span.className = 'char';
+                span.textContent = kanaChars[i];
+                
+                if (i < completedParts) {
+                    span.classList.add('typed');
+                }
+                
+                japaneseDiv.appendChild(span);
+            }
+            
+            // 入力キー表示（/を背景色付きスペースで表示）
+            const challengeDiv = document.getElementById('challengeText');
+            challengeDiv.innerHTML = '';
+            
+            let charIndex = 0;
+            for (let i = 0; i < challengeRomaji.length; i++) {
+                const char = challengeRomaji[i];
+                
+                if (char === ' ') {
+                    // 通常のスペース（色抜き用区切り）は表示しない
+                    continue;
+                }
+                
+                const span = document.createElement('span');
+                span.className = 'char';
+                
+                if (char === '/') {
+                    // /はスペース入力を促す
+                    span.textContent = ' '; // 空白で表示
+                    span.style.backgroundColor = '#ffe0b2'; // 背景色（オレンジ系）
+                    span.style.minWidth = '15px'; // 最小幅を確保
+                } else {
+                    span.textContent = char;
+                }
+                
+                if (charIndex < currentPosition) {
+                    span.classList.add('typed');
+                } else if (charIndex === currentPosition) {
+                    span.classList.add('current');
+                }
+                
+                charIndex++;
+                challengeDiv.appendChild(span);
+            }
+        }
+        
+        // UI更新
+        function updateUI() {
+            const currentChar = challengeText[currentPosition];
+            
+            // 指ガイド表示
+            document.getElementById('fingerGuide').textContent = 
+                fingerGuides[currentChar] || '通常の位置';
+            
+            // キーボードハイライト（次のキーのみ青く表示）
+            Object.values(keyElements).forEach(key => {
+                key.classList.remove('highlight', 'pressed-correct', 'pressed-incorrect');
+            });
+            if (keyElements[currentChar]) {
+                keyElements[currentChar].classList.add('highlight');
+            }
+            
+            // 統計表示
+            document.getElementById('correctCount').textContent = correctCount;
+            document.getElementById('incorrectCount').textContent = incorrectCount;
+            document.getElementById('progress').textContent = 
+                `${currentPosition}/${challengeText.length}`;
+            
+            // メッセージ表示
+            document.getElementById('challengeMessage').textContent = 
+                challengeMessage || 'がんばりましょう！';
+            
+            displayChallenge();
+        }
+        
+        // キーボードに押下フィードバックを表示
+        function showKeyPress(key, isCorrect) {
+            if (keyElements[key]) {
+                const className = isCorrect ? 'pressed-correct' : 'pressed-incorrect';
+                keyElements[key].classList.add(className);
+                
+                setTimeout(() => {
+                    keyElements[key].classList.remove(className);
+                }, 300);
+            }
+        }
+        
+        // キー入力処理
+        function handleKeyPress(event) {
+            const key = event.key;
+            
+            // スタート画面の場合
+            if (!practiceStarted && !document.getElementById('startScreen').classList.contains('hidden')) {
+                // Enterキーの場合はデフォルト動作を防止
+                if (key === 'Enter') {
+                    event.preventDefault();
+                }
+                startPractice();
+                return;
+            }
+            
+            // クリア画面の場合
+            if (!document.getElementById('clearScreen').classList.contains('hidden')) {
+                if (key === 'Enter') {
+                    event.preventDefault();
+                    nextChallenge();
+                }
+                return;
+            }
+            
+            // 結果画面の場合
+            if (!document.getElementById('resultArea').classList.contains('hidden')) {
+                return;
+            }
+            
+            // ゲームエリアが表示されていない場合は何もしない
+            if (document.getElementById('gameArea').classList.contains('hidden')) {
+                return;
+            }
+            
+            const targetChar = challengeText[currentPosition];
+            
+            // スペースキーとEnterキーのデフォルト動作を防止
+            if (key === ' ' || key === 'Enter') {
+                event.preventDefault();
+            }
+            
+            // Enterキーは入力として扱わない（ボタンのトリガーを防ぐ）
+            if (key === 'Enter') {
+                return;
+            }
+            
+            const feedback = document.getElementById('feedback');
+            
+            if (key === targetChar) {
+                // 正解
+                showKeyPress(key, true); // キーボードに緑の押下フィードバック
+                feedback.className = 'feedback correct';
+                feedback.textContent = '◎ 正解！';
+                correctCount++;
+                currentPosition++;
+                
+                setTimeout(() => {
+                    feedback.textContent = '';
+                    feedback.className = 'feedback';
+                    
+                    if (currentPosition >= challengeText.length) {
+                        clearChallenge();
+                    } else {
+                        updateUI();
+                    }
+                }, 300);
+            } else {
+                // 不正解
+                showKeyPress(key, false); // キーボードに赤の押下フィードバック
+                feedback.className = 'feedback incorrect';
+                feedback.textContent = '✗ 不正解！もう一度';
+                incorrectCount++;
+                
+                setTimeout(() => {
+                    feedback.textContent = '';
+                    feedback.className = 'feedback';
+                }, 800);
+            }
+            
+            updateUI();
+        }
+        
+        // 初期化
+        drawKeyboard();
+        document.addEventListener('keydown', handleKeyPress);
+    </script>
 </body>
 </html>
