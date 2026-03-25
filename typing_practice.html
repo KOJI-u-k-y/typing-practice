@@ -291,6 +291,47 @@
             font-weight: bold;
         }
         
+        /* 特殊キー表示 */
+        .special-keys {
+            background: #fff3e0;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .special-keys-title {
+            font-size: 14px;
+            color: #e65100;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .special-keys-list {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .special-key-item {
+            background: white;
+            border: 2px solid #ffb74d;
+            border-radius: 5px;
+            padding: 8px 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            min-width: 70px;
+            text-align: center;
+        }
+        
+        .special-key-char {
+            font-size: 18px;
+            font-weight: bold;
+            color: #e65100;
+            margin-right: 5px;
+        }
+        
         /* 統計 */
         .stats {
             display: flex;
@@ -605,6 +646,28 @@
             <!-- フィードバック -->
             <div class="feedback" id="feedback"></div>
             
+            <!-- 特殊キー表示 -->
+            <div class="special-keys">
+                <div class="special-keys-title">特殊キー</div>
+                <div class="special-keys-list">
+                    <div class="special-key-item">
+                        <span class="special-key-char">ー</span> 0の右隣
+                    </div>
+                    <div class="special-key-item">
+                        <span class="special-key-char">、</span> Mの右
+                    </div>
+                    <div class="special-key-item">
+                        <span class="special-key-char">。</span> 、の右
+                    </div>
+                    <div class="special-key-item">
+                        <span class="special-key-char">「」</span> Pの右
+                    </div>
+                    <div class="special-key-item">
+                        <span class="special-key-char">・</span> /
+                    </div>
+                </div>
+            </div>
+            
             <!-- 指ガイド -->
             <div class="finger-guide">
                 <div class="finger-guide-label">指ガイド</div>
@@ -736,68 +799,13 @@
             ' ': '両手 親指 - スペースキー',
         };
         
-        // ひらがな→ローマ字の文字数マッピング
-        const kanaToRomajiLength = {
-            // 特殊音（カタカナ系）
-            'ゔぁ': 2, 'ゔぃ': 2, 'ゔ': 2, 'ゔぇ': 2, 'ゔぉ': 2,
-            'てぃ': 4, 'でぃ': 4,
-            'ふぁ': 2, 'ふぃ': 2, 'ふぇ': 2, 'ふぉ': 2,
-            
-            // 拗音（3文字）
-            'きゃ': 3, 'きゅ': 3, 'きょ': 3,
-            'しゃ': 3, 'しゅ': 3, 'しょ': 3,
-            'ちゃ': 3, 'ちゅ': 3, 'ちょ': 3,
-            'にゃ': 3, 'にゅ': 3, 'にょ': 3,
-            'ひゃ': 3, 'ひゅ': 3, 'ひょ': 3,
-            'みゃ': 3, 'みゅ': 3, 'みょ': 3,
-            'りゃ': 3, 'りゅ': 3, 'りょ': 3,
-            'ぎゃ': 3, 'ぎゅ': 3, 'ぎょ': 3,
-            'じゃ': 2, 'じゅ': 2, 'じょ': 2, // ja, ju, jo
-            'びゃ': 3, 'びゅ': 3, 'びょ': 3,
-            'ぴゃ': 3, 'ぴゅ': 3, 'ぴょ': 3,
-            
-            // 促音
-            'っ': 0, // 次の子音を重ねるのでカウントしない
-            
-            // 撥音（文脈依存だが、入力キーから判定）
-            'ん': 1, // デフォルト1文字、nnの場合は2文字
-            
-            // 長音
-            'ー': 1,
-            
-            // 母音（1文字）
-            'あ': 1, 'い': 1, 'う': 1, 'え': 1, 'お': 1,
-            
-            // スペース
-            ' ': 1
-        };
-        
-        // デフォルトの仮名は2文字（ka, ki, ku...）
-        function getKanaRomajiLength(kana, romajiText, romajiPos) {
-            // 特殊パターンのチェック（2文字の仮名）
-            if (kanaToRomajiLength[kana]) {
-                return kanaToRomajiLength[kana];
-            }
-            
-            // 「ん」の特殊処理：入力キーがnnなら2文字
-            if (kana === 'ん') {
-                if (romajiText.substr(romajiPos, 2) === 'nn') {
-                    return 2;
-                }
-                return 1;
-            }
-            
-            // デフォルトは2文字
-            return 2;
-        }
-        
         // デフォルト課題データ
         const defaultChallenges = [
             {
                 mainText: 'テスト課題です',
                 japanese: 'てすとかだいです',
-                romaji: 'tesutokadaidesu',
-                message: '3段表示のテスト'
+                romaji: 'te su to  ka da i de su',
+                message: 'スペース区切りのテスト'
             }
         ];
         
@@ -806,7 +814,8 @@
         let currentChallengeIndex = 0;
         let challengeMainText = '';
         let challengeJapanese = '';
-        let challengeText = '';
+        let challengeRomaji = ''; // スペース付きローマ字
+        let challengeText = ''; // スペースを除去した入力用テキスト
         let challengeMessage = '';
         let currentPosition = 0;
         let correctCount = 0;
@@ -964,9 +973,10 @@
         // 課題を読み込む
         function loadChallenge(index) {
             const challenge = challenges[index];
-            challengeMainText = challenge.mainText || challenge.japanese; // 本文（なければよみがなを使用）
+            challengeMainText = challenge.mainText || challenge.japanese;
             challengeJapanese = challenge.japanese;
-            challengeText = challenge.romaji;
+            challengeRomaji = challenge.romaji; // スペースと/付き
+            challengeText = challengeRomaji.replace(/ /g, '').replace(/\//g, ' '); // スペース削除、/を実スペースに
             challengeMessage = challenge.message || '';
             currentPosition = 0;
             correctCount = 0;
@@ -1087,51 +1097,31 @@
             const mainTextDiv = document.getElementById('challengeMainText');
             mainTextDiv.textContent = challengeMainText;
             
-            // よみがなとローマ字の対応を計算
-            let romajiPos = 0;
-            let kanaPositions = []; // 各かなに対応するローマ字の開始位置と長さ
+            // よみがなを1文字ずつ
+            const kanaChars = challengeJapanese.split('');
             
-            for (let i = 0; i < challengeJapanese.length; i++) {
-                const kana = challengeJapanese[i];
+            // 入力キーをスペースと/で分割
+            const romajiParts = challengeRomaji.split(/[\s\/]+/).filter(p => p);
+            
+            // challengeText（実際の入力）から完了パート数を計算
+            let completedKana = 0;
+            let textPos = 0;
+            
+            for (let i = 0; i < romajiParts.length; i++) {
+                const part = romajiParts[i];
+                const partEnd = textPos + part.length;
                 
-                // 2文字の特殊音をチェック
-                const kana2 = challengeJapanese.substr(i, 2);
-                let romajiLength = 0;
-                let kanaLength = 1;
-                
-                if (kanaToRomajiLength[kana2] !== undefined) {
-                    // 2文字の特殊音
-                    romajiLength = kanaToRomajiLength[kana2];
-                    kanaLength = 2;
+                // このパートを完全に入力し終えたら
+                if (currentPosition >= partEnd) {
+                    completedKana++;
+                    textPos = partEnd;
+                    
+                    // 次が/（スペース）なら+1
+                    if (textPos < challengeText.length && challengeText[textPos] === ' ') {
+                        textPos++;
+                    }
                 } else {
-                    // 1文字
-                    romajiLength = getKanaRomajiLength(kana, challengeText, romajiPos);
-                }
-                
-                kanaPositions.push({
-                    kanaIndex: i,
-                    kanaLength: kanaLength,
-                    romajiStart: romajiPos,
-                    romajiLength: romajiLength
-                });
-                
-                romajiPos += romajiLength;
-                
-                if (kanaLength === 2) {
-                    i++; // 2文字消費した場合はスキップ
-                }
-            }
-            
-            // 現在位置に対応するかなのインデックスを計算
-            let currentKanaIndex = 0;
-            for (let i = 0; i < kanaPositions.length; i++) {
-                const pos = kanaPositions[i];
-                if (currentPosition >= pos.romajiStart && currentPosition < pos.romajiStart + pos.romajiLength) {
-                    currentKanaIndex = i;
                     break;
-                }
-                if (currentPosition >= pos.romajiStart + pos.romajiLength) {
-                    currentKanaIndex = i + 1;
                 }
             }
             
@@ -1139,37 +1129,50 @@
             const japaneseDiv = document.getElementById('challengeJapanese');
             japaneseDiv.innerHTML = '';
             
-            let charIndex = 0;
-            for (let i = 0; i < kanaPositions.length; i++) {
-                const pos = kanaPositions[i];
-                const kanaText = challengeJapanese.substr(pos.kanaIndex, pos.kanaLength);
-                
+            for (let i = 0; i < kanaChars.length; i++) {
                 const span = document.createElement('span');
                 span.className = 'char';
-                span.textContent = kanaText;
+                span.textContent = kanaChars[i];
                 
-                if (i < currentKanaIndex) {
+                if (i < completedKana) {
                     span.classList.add('typed');
                 }
                 
                 japaneseDiv.appendChild(span);
             }
             
-            // 入力キー表示
+            // 入力キー表示（/を背景色付きスペースで表示）
             const challengeDiv = document.getElementById('challengeText');
             challengeDiv.innerHTML = '';
             
-            for (let i = 0; i < challengeText.length; i++) {
+            let displayPos = 0;
+            for (let i = 0; i < challengeRomaji.length; i++) {
+                const char = challengeRomaji[i];
+                
+                if (char === ' ') {
+                    // 通常のスペース（色抜き用区切り）は表示しない
+                    continue;
+                }
+                
                 const span = document.createElement('span');
                 span.className = 'char';
-                span.textContent = challengeText[i];
                 
-                if (i < currentPosition) {
+                if (char === '/') {
+                    // /はスペース入力を促す
+                    span.textContent = ' ';
+                    span.style.backgroundColor = '#ffe0b2';
+                    span.style.minWidth = '15px';
+                } else {
+                    span.textContent = char;
+                }
+                
+                if (displayPos < currentPosition) {
                     span.classList.add('typed');
-                } else if (i === currentPosition) {
+                } else if (displayPos === currentPosition) {
                     span.classList.add('current');
                 }
                 
+                displayPos++;
                 challengeDiv.appendChild(span);
             }
         }
