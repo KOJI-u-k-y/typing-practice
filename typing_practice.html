@@ -341,6 +341,32 @@
             border-radius: 10px;
         }
         
+        .stats-panel {
+            background: #f7f7f7;
+            border-radius: 10px;
+            padding: 15px;
+        }
+        
+        .stats-item {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stats-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .stats-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
         .stat {
             text-align: center;
         }
@@ -643,10 +669,8 @@
                 <div class="challenge-number" id="challengeNumber">課題 1</div>
                 <button class="btn-end" onclick="endPractice()">練習終了</button>
             </div>
-            <!-- キーボード表示 -->
-            <div class="keyboard" id="keyboard"></div>
             
-            <!-- 課題文字列 -->
+            <!-- 課題文字列（上部・大きく） -->
             <div class="challenge">
                 <div class="challenge-header">
                     <div class="challenge-label">課題文字列</div>
@@ -666,6 +690,32 @@
                 <div class="challenge-row">
                     <div class="challenge-row-label">入力キー</div>
                     <div class="challenge-text" id="challengeText"></div>
+                </div>
+            </div>
+            
+            <!-- キーボードと統計を横並び -->
+            <div style="display: flex; gap: 20px; margin-top: 20px;">
+                <!-- 左：キーボード -->
+                <div style="flex: 1;">
+                    <div class="keyboard" id="keyboard"></div>
+                </div>
+                
+                <!-- 右：統計 -->
+                <div style="width: 200px;">
+                    <div class="stats-panel">
+                        <div class="stats-item">
+                            <div class="stats-label">課題数</div>
+                            <div class="stats-value" id="challengeNumberDisplay">1</div>
+                        </div>
+                        <div class="stats-item">
+                            <div class="stats-label">成功数</div>
+                            <div class="stats-value"><span id="correctCount">0</span> / <span id="totalKeys">0</span></div>
+                        </div>
+                        <div class="stats-item">
+                            <div class="stats-label">失敗数</div>
+                            <div class="stats-value"><span id="incorrectCount">0</span> / <span id="totalAttempts">0</span></div>
+                        </div>
+                    </div>
                 </div>
             </div>
             
@@ -698,22 +748,6 @@
             <div class="finger-guide">
                 <div class="finger-guide-label">指ガイド</div>
                 <div class="finger-guide-text" id="fingerGuide">-</div>
-            </div>
-            
-            <!-- 統計 -->
-            <div class="stats">
-                <div class="stat">
-                    <div class="stat-label">正解</div>
-                    <div class="stat-value correct" id="correctCount">0</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-label">不正解</div>
-                    <div class="stat-value incorrect" id="incorrectCount">0</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-label">進捗</div>
-                    <div class="stat-value" id="progress">0/0</div>
-                </div>
             </div>
             
             <!-- 課題メッセージ -->
@@ -847,11 +881,14 @@
         let challenges = [...defaultChallenges];
         let currentChallengeIndex = 0;
         let challengeMainText = '';
-        let challengeJapanese = '';
-        let challengeRomaji = ''; // スペース付きローマ字
-        let challengeText = ''; // スペースを除去した入力用テキスト
+        let romajiSource = ''; // .btcからのローマ字（スペース・/付き）
+        let romajiDisplay = ''; // 表示・入力用（スペース削除、/→スペース）
+        let kanaDisplay = ''; // よみがな表示用（スペース残す）
+        let kanaIndexArray = []; // ローマ字各文字に対応するよみがな位置
         let challengeMessage = '';
-        let currentPosition = 0;
+        let posSource = 0; // .btcファイル上の位置
+        let posRomaji = 0; // ローマ字入力位置
+        let posKana = 0; // よみがな色抜き位置
         let correctCount = 0;
         let incorrectCount = 0;
         let startTime = Date.now();
@@ -1008,11 +1045,59 @@
         function loadChallenge(index) {
             const challenge = challenges[index];
             challengeMainText = challenge.mainText || challenge.japanese;
-            challengeJapanese = challenge.japanese;
-            challengeRomaji = challenge.romaji; // スペースと/付き
-            challengeText = challengeRomaji.replace(/ /g, '').replace(/\//g, ' '); // スペース削除、/を実スペースに
+            
+            // よみがな（スペースは残す）
+            kanaDisplay = challenge.japanese;
+            
+            // .btcからのローマ字
+            romajiSource = challenge.romaji;
+            
+            // ローマ字表示用と配列を作成
+            romajiDisplay = '';
+            kanaIndexArray = [];
+            let kana = 0;
+            let romajiPos = 0;
+            
+            for (let i = 0; i < romajiSource.length; i++) {
+                const char = romajiSource[i];
+                
+                if (char === ' ') {
+                    // スペースは飛ばす（romajiDisplayに含めない）
+                    continue;
+                }
+                
+                // 次の文字を確認
+                const nextChar = i + 1 < romajiSource.length ? romajiSource[i + 1] : '';
+                
+                // 次がスペースなら
+                if (nextChar === ' ') {
+                    kanaIndexArray[romajiPos] = kana + 1;
+                    kana++;
+                } else {
+                    kanaIndexArray[romajiPos] = kana;
+                }
+                
+                // /をスペースに変換してromajiDisplayに追加
+                if (char === '/') {
+                    romajiDisplay += ' ';
+                } else {
+                    romajiDisplay += char;
+                }
+                
+                romajiPos++;
+            }
+            
+            console.log('=== 課題読み込み ===');
+            console.log('よみがな:', kanaDisplay);
+            console.log('ローマ字表示:', romajiDisplay);
+            console.log('配列:', kanaIndexArray);
+            
             challengeMessage = challenge.message || '';
-            currentPosition = 0;
+            
+            // 3つの位置をリセット
+            posSource = 0;
+            posRomaji = 0;
+            posKana = 0;
             correctCount = 0;
             incorrectCount = 0;
             challengeStartTime = Date.now();
@@ -1046,6 +1131,11 @@
             totalChallengesCleared++;
             totalCorrect += correctCount;
             totalIncorrect += incorrectCount;
+            
+            console.log('=== 課題クリア ===');
+            console.log('課題数:', totalChallengesCleared);
+            console.log('今回の正解:', correctCount, '総正解:', totalCorrect);
+            console.log('今回の不正解:', incorrectCount, '総不正解:', totalIncorrect);
             
             // クリア画面を表示
             document.getElementById('gameArea').classList.add('hidden');
@@ -1171,72 +1261,50 @@
         
         // 課題文字列表示
         function displayChallenge() {
-            // 本文表示（固定、色抜きなし）
+            // 本文表示（固定）
             const mainTextDiv = document.getElementById('challengeMainText');
             mainTextDiv.textContent = challengeMainText;
             
-            // よみがなを1文字ずつ
-            const kanaChars = challengeJapanese.split('');
-            
-            // 入力キーをスペースと/で分割
-            const romajiParts = challengeRomaji.split(/[\s\/]+/).filter(p => p);
-            
-            // challengeText（実際の入力）から完了パート数を計算
-            let completedKana = 0;
-            let textPos = 0;
-            
-            for (let i = 0; i < romajiParts.length; i++) {
-                const part = romajiParts[i];
-                const partEnd = textPos + part.length;
-                
-                // このパートを完全に入力し終えたら
-                if (currentPosition >= partEnd) {
-                    completedKana++;
-                    textPos = partEnd;
-                    
-                    // 次が/（スペース）なら+1
-                    if (textPos < challengeText.length && challengeText[textPos] === ' ') {
-                        textPos++;
-                    }
-                } else {
-                    break;
-                }
-            }
-            
-            // よみがな表示
+            // よみがな表示（kanaIndexArray[correctCount-1]文字まで色抜き）
             const japaneseDiv = document.getElementById('challengeJapanese');
             japaneseDiv.innerHTML = '';
             
-            for (let i = 0; i < kanaChars.length; i++) {
+            // よみがなのスペースを背景色で表示
+            let kanaColorLimit = correctCount > 0 ? kanaIndexArray[correctCount - 1] : 0;
+            let kanaCharIndex = 0; // スペースを除いた文字カウント
+            
+            for (let i = 0; i < kanaDisplay.length; i++) {
+                const char = kanaDisplay[i];
                 const span = document.createElement('span');
                 span.className = 'char';
-                span.textContent = kanaChars[i];
+                span.textContent = char;
                 
-                if (i < completedKana) {
-                    span.classList.add('typed');
+                if (char === ' ') {
+                    // スペースは背景色変更
+                    span.style.backgroundColor = '#ffe0b2';
+                    span.style.minWidth = '15px';
+                } else {
+                    // 文字の色抜き判定
+                    if (kanaCharIndex < kanaColorLimit) {
+                        span.classList.add('typed');
+                    }
+                    kanaCharIndex++;
                 }
                 
                 japaneseDiv.appendChild(span);
             }
             
-            // 入力キー表示（/を背景色付きスペースで表示）
+            // ローマ字表示（correctCount文字まで色抜き）
             const challengeDiv = document.getElementById('challengeText');
             challengeDiv.innerHTML = '';
             
-            let displayPos = 0;
-            for (let i = 0; i < challengeRomaji.length; i++) {
-                const char = challengeRomaji[i];
-                
-                if (char === ' ') {
-                    // 通常のスペース（色抜き用区切り）は表示しない
-                    continue;
-                }
-                
+            for (let i = 0; i < romajiDisplay.length; i++) {
+                const char = romajiDisplay[i];
                 const span = document.createElement('span');
                 span.className = 'char';
                 
-                if (char === '/') {
-                    // /はスペース入力を促す
+                if (char === ' ') {
+                    // スペースは背景色変更
                     span.textContent = ' ';
                     span.style.backgroundColor = '#ffe0b2';
                     span.style.minWidth = '15px';
@@ -1244,20 +1312,19 @@
                     span.textContent = char;
                 }
                 
-                if (displayPos < currentPosition) {
+                if (i < correctCount) {
                     span.classList.add('typed');
-                } else if (displayPos === currentPosition) {
+                } else if (i === correctCount) {
                     span.classList.add('current');
                 }
                 
-                displayPos++;
                 challengeDiv.appendChild(span);
             }
         }
         
         // UI更新
         function updateUI() {
-            const currentChar = challengeText[currentPosition];
+            const currentChar = romajiDisplay[correctCount];
             
             // 指ガイド表示
             document.getElementById('fingerGuide').textContent = 
@@ -1271,11 +1338,12 @@
                 keyElements[currentChar].classList.add('highlight');
             }
             
-            // 統計表示
+            // 統計パネル更新
+            document.getElementById('challengeNumberDisplay').textContent = currentChallengeIndex + 1;
             document.getElementById('correctCount').textContent = correctCount;
+            document.getElementById('totalKeys').textContent = romajiDisplay.length;
             document.getElementById('incorrectCount').textContent = incorrectCount;
-            document.getElementById('progress').textContent = 
-                `${currentPosition}/${challengeText.length}`;
+            document.getElementById('totalAttempts').textContent = correctCount + incorrectCount;
             
             // メッセージ表示
             document.getElementById('challengeMessage').textContent = 
@@ -1329,7 +1397,7 @@
                 return;
             }
             
-            const targetChar = challengeText[currentPosition];
+            const targetChar = romajiDisplay[correctCount];
             
             // スペースキーとEnterキーのデフォルト動作を防止
             if (key === ' ' || key === 'Enter') {
@@ -1345,17 +1413,18 @@
             
             if (key === targetChar) {
                 // 正解
-                showKeyPress(key, true); // キーボードに緑の押下フィードバック
+                showKeyPress(key, true);
                 feedback.className = 'feedback correct';
                 feedback.textContent = '◎ 正解！';
                 correctCount++;
-                currentPosition++;
+                
+                console.log('正解！ correctCount:', correctCount, 'kanaIndex:', kanaIndexArray[correctCount - 1]);
                 
                 setTimeout(() => {
                     feedback.textContent = '';
                     feedback.className = 'feedback';
                     
-                    if (currentPosition >= challengeText.length) {
+                    if (correctCount >= romajiDisplay.length) {
                         clearChallenge();
                     } else {
                         updateUI();
@@ -1363,7 +1432,7 @@
                 }, 300);
             } else {
                 // 不正解
-                showKeyPress(key, false); // キーボードに赤の押下フィードバック
+                showKeyPress(key, false);
                 feedback.className = 'feedback incorrect';
                 feedback.textContent = '✗ 不正解！もう一度';
                 incorrectCount++;
