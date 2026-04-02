@@ -179,21 +179,21 @@
         
         .challenge-text {
             font-family: 'JetBrains Mono', monospace;
-            font-size: 32px;
+            font-size: 20px;
             letter-spacing: 1px;
-            line-height: 1.8;
-            font-weight: bold;
+            line-height: 1.5;
         }
         
         .challenge-text.main-text {
             font-family: 'Noto Sans JP', sans-serif;
-            font-size: 30px;
+            font-size: 28px;
             color: #333;
+            font-weight: bold;
         }
         
         .challenge-text.japanese {
             font-family: 'Noto Sans JP', sans-serif;
-            font-size: 28px;
+            font-size: 20px;
         }
         
         .challenge-text .char {
@@ -901,6 +901,7 @@
         let totalStartTime = 0;
         let practiceStarted = false;
         let challengeStartTime = 0;
+        let clearChallengeCallCount = 0; // デバッグ用
         
         // 課題ファイル読み込み
         function loadChallengeFile(event) {
@@ -1123,6 +1124,9 @@
         
         // 課題クリア
         function clearChallenge() {
+            clearChallengeCallCount++;
+            console.log('=== 課題クリア（呼び出し' + clearChallengeCallCount + '回目）===');
+            
             const challengeEndTime = Date.now();
             const elapsed = Math.floor((challengeEndTime - challengeStartTime) / 1000);
             const accuracy = ((correctCount / (correctCount + incorrectCount)) * 100).toFixed(1);
@@ -1132,7 +1136,6 @@
             totalCorrect += correctCount;
             totalIncorrect += incorrectCount;
             
-            console.log('=== 課題クリア ===');
             console.log('課題数:', totalChallengesCleared);
             console.log('今回の正解:', correctCount, '総正解:', totalCorrect);
             console.log('今回の不正解:', incorrectCount, '総不正解:', totalIncorrect);
@@ -1164,6 +1167,11 @@
         
         // 練習終了
         function endPractice() {
+            console.log('=== 練習終了 ===');
+            console.log('totalChallengesCleared:', totalChallengesCleared);
+            console.log('totalCorrect:', totalCorrect);
+            console.log('totalIncorrect:', totalIncorrect);
+            
             const totalEndTime = Date.now();
             const totalElapsed = Math.floor((totalEndTime - totalStartTime) / 1000);
             const totalAccuracy = totalCorrect + totalIncorrect > 0 
