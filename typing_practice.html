@@ -899,9 +899,11 @@
         let totalCorrect = 0;
         let totalIncorrect = 0;
         let totalStartTime = 0;
+        let totalElapsedSeconds = 0; // 各課題の所要時間の合計（秒）
         let practiceStarted = false;
         let challengeStartTime = 0;
         let clearChallengeCallCount = 0; // デバッグ用
+        let isChallengeEnding = false; // 課題終了フラグ（二重カウント防止）
         
         // 課題ファイル読み込み
         function loadChallengeFile(event) {
@@ -1103,6 +1105,15 @@
             incorrectCount = 0;
             challengeStartTime = Date.now();
             
+            // 最初の課題の場合のみtotalStartTimeを設定
+            if (index === 0 && totalStartTime === 0) {
+                totalStartTime = Date.now();
+                console.log('⏱️ 総合時間計測開始:', totalStartTime);
+            }
+            
+            // 課題終了フラグを下ろす（念のため）
+            isChallengeEnding = false;
+            
             document.getElementById('challengeNumber').textContent = 
                 `課題 ${index + 1} / ${challenges.length}`;
             
@@ -1114,7 +1125,7 @@
             if (practiceStarted) return;
             
             practiceStarted = true;
-            totalStartTime = Date.now();
+            // totalStartTimeはここでは設定しない（最初の課題開始時に設定）
             
             document.getElementById('startScreen').classList.add('hidden');
             document.getElementById('gameArea').classList.remove('hidden');
@@ -1124,6 +1135,15 @@
         
         // 課題クリア
         function clearChallenge() {
+            // フラグが立っている場合は何もしない（二重カウント防止）
+            if (isChallengeEnding) {
+                console.log('⚠️ 既に課題終了処理中のため、スキップします');
+                return;
+            }
+            
+            // フラグを立てる
+            isChallengeEnding = true;
+            
             clearChallengeCallCount++;
             console.log('=== 課題クリア（呼び出し' + clearChallengeCallCount + '回目）===');
             
@@ -1131,14 +1151,16 @@
             const elapsed = Math.floor((challengeEndTime - challengeStartTime) / 1000);
             const accuracy = ((correctCount / (correctCount + incorrectCount)) * 100).toFixed(1);
             
-            // 総計に追加
+            // 総計に追加（フラグが立っているのでここは1回だけ実行される）
             totalChallengesCleared++;
             totalCorrect += correctCount;
             totalIncorrect += incorrectCount;
+            totalElapsedSeconds += elapsed; // 各課題の所要時間を合計
             
             console.log('課題数:', totalChallengesCleared);
             console.log('今回の正解:', correctCount, '総正解:', totalCorrect);
             console.log('今回の不正解:', incorrectCount, '総不正解:', totalIncorrect);
+            console.log('今回の所要時間:', elapsed, '秒', '累計時間:', totalElapsedSeconds, '秒');
             
             // クリア画面を表示
             document.getElementById('gameArea').classList.add('hidden');
@@ -1152,6 +1174,9 @@
         
         // 次の課題へ
         function nextChallenge() {
+            // フラグを下ろす（次の課題に進む準備）
+            isChallengeEnding = false;
+            
             currentChallengeIndex++;
             
             if (currentChallengeIndex >= challenges.length) {
@@ -1171,9 +1196,11 @@
             console.log('totalChallengesCleared:', totalChallengesCleared);
             console.log('totalCorrect:', totalCorrect);
             console.log('totalIncorrect:', totalIncorrect);
+            console.log('totalElapsedSeconds:', totalElapsedSeconds, '秒');
             
-            const totalEndTime = Date.now();
-            const totalElapsed = Math.floor((totalEndTime - totalStartTime) / 1000);
+            // 各課題の所要時間の合計を使用
+            const totalElapsed = totalElapsedSeconds;
+            
             const totalAccuracy = totalCorrect + totalIncorrect > 0 
                 ? ((totalCorrect / (totalCorrect + totalIncorrect)) * 100).toFixed(1)
                 : 0;
