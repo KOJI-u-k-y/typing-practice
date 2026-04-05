@@ -708,6 +708,10 @@
                             <div class="stats-value" id="challengeNumberDisplay">1</div>
                         </div>
                         <div class="stats-item">
+                            <div class="stats-label">経過時間</div>
+                            <div class="stats-value" id="elapsedTime" style="color: #e65100;">0.0秒</div>
+                        </div>
+                        <div class="stats-item">
                             <div class="stats-label">成功数</div>
                             <div class="stats-value"><span id="correctCount">0</span> / <span id="totalKeys">0</span></div>
                         </div>
@@ -904,6 +908,8 @@
         let challengeStartTime = 0;
         let clearChallengeCallCount = 0; // デバッグ用
         let isChallengeEnding = false; // 課題終了フラグ（二重カウント防止）
+        let endFlag = 0; // ビットフラグ（1=課題数, 2=正解数, 4=不正解数, 8=時間）
+        let timerIntervalId = null; // タイマーのインターバルID
         
         // 課題ファイル読み込み
         function loadChallengeFile(event) {
@@ -1114,6 +1120,18 @@
             // 課題終了フラグを下ろす（念のため）
             isChallengeEnding = false;
             
+            // 既存のタイマーがあれば停止
+            if (timerIntervalId) {
+                clearInterval(timerIntervalId);
+            }
+            
+            // タイマーを開始（100ミリ秒ごとに更新）
+            timerIntervalId = setInterval(() => {
+                const now = Date.now();
+                const elapsed = (now - challengeStartTime) / 1000; // 秒（小数点以下あり）
+                document.getElementById('elapsedTime').textContent = elapsed.toFixed(1) + '秒';
+            }, 100);
+            
             document.getElementById('challengeNumber').textContent = 
                 `課題 ${index + 1} / ${challenges.length}`;
             
@@ -1151,16 +1169,49 @@
             const elapsed = Math.floor((challengeEndTime - challengeStartTime) / 1000);
             const accuracy = ((correctCount / (correctCount + incorrectCount)) * 100).toFixed(1);
             
-            // 総計に追加（フラグが立っているのでここは1回だけ実行される）
-            totalChallengesCleared++;
-            totalCorrect += correctCount;
-            totalIncorrect += incorrectCount;
-            totalElapsedSeconds += elapsed; // 各課題の所要時間を合計
+            // ビットフラグを立てる（31 = 0b11111）
+            endFlag = 31;
             
-            console.log('課題数:', totalChallengesCleared);
-            console.log('今回の正解:', correctCount, '総正解:', totalCorrect);
-            console.log('今回の不正解:', incorrectCount, '総不正解:', totalIncorrect);
-            console.log('今回の所要時間:', elapsed, '秒', '累計時間:', totalElapsedSeconds, '秒');
+            console.log('フラグ設定: endFlag =', endFlag, '(0b' + endFlag.toString(2) + ')');
+            
+            // ビット1: 課題数
+            if (endFlag & 1) {
+                totalChallengesCleared++;
+                endFlag -= 1;
+                console.log('✓ 課題数加算:', totalChallengesCleared, 'フラグ残:', endFlag);
+            }
+            
+            // ビット2: 正解数
+            if (endFlag & 2) {
+                totalCorrect += correctCount;
+                endFlag -= 2;
+                console.log('✓ 正解数加算:', correctCount, '→', totalCorrect, 'フラグ残:', endFlag);
+            }
+            
+            // ビット4: 不正解数
+            if (endFlag & 4) {
+                totalIncorrect += incorrectCount;
+                endFlag -= 4;
+                console.log('✓ 不正解数加算:', incorrectCount, '→', totalIncorrect, 'フラグ残:', endFlag);
+            }
+            
+            // ビット8: 時間
+            if (endFlag & 8) {
+                totalElapsedSeconds += elapsed;
+                endFlag -= 8;
+                console.log('✓ 時間加算:', elapsed, '秒 →', totalElapsedSeconds, '秒 フラグ残:', endFlag);
+            }
+            
+            console.log('最終フラグ:', endFlag, '(全て処理済みなら0)');
+            
+            // フラグをリセット
+            endFlag = 0;
+            
+            // タイマーを停止
+            if (timerIntervalId) {
+                clearInterval(timerIntervalId);
+                timerIntervalId = null;
+            }
             
             // クリア画面を表示
             document.getElementById('gameArea').classList.add('hidden');
@@ -1192,6 +1243,12 @@
         
         // 練習終了
         function endPractice() {
+            // タイマーを停止
+            if (timerIntervalId) {
+                clearInterval(timerIntervalId);
+                timerIntervalId = null;
+            }
+            
             console.log('=== 練習終了 ===');
             console.log('totalChallengesCleared:', totalChallengesCleared);
             console.log('totalCorrect:', totalCorrect);
