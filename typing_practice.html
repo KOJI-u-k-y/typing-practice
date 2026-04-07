@@ -1145,6 +1145,11 @@
             practiceStarted = true;
             // totalStartTimeはここでは設定しない（最初の課題開始時に設定）
             
+            // アクティブな要素（ボタンなど）からフォーカスを外す
+            if (document.activeElement) {
+                document.activeElement.blur();
+            }
+            
             document.getElementById('startScreen').classList.add('hidden');
             document.getElementById('gameArea').classList.remove('hidden');
             
@@ -1462,9 +1467,10 @@
             
             // スタート画面の場合
             if (!practiceStarted && !document.getElementById('startScreen').classList.contains('hidden')) {
-                // Enterキーの場合はデフォルト動作を防止
-                if (key === 'Enter') {
+                // Enter・スペースキーのデフォルト動作を防止（ボタンクリックを防ぐ）
+                if (key === 'Enter' || key === ' ') {
                     event.preventDefault();
+                    event.stopPropagation(); // イベント伝播も停止
                 }
                 startPractice();
                 return;
