@@ -122,6 +122,29 @@
             width: 200px;
         }
         
+        /* 応援キャラクター */
+        .character-frame {
+            position: absolute;
+            top: 80px;
+            right: 20px;
+            width: 300px;
+            height: 520px;
+            background: #f7f7f7;
+            border-radius: 15px;
+            padding: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        .character-frame img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        
         /* 課題文字列 */
         .challenge {
             background: #f0f0f0;
@@ -668,6 +691,11 @@
             <div class="header-controls">
                 <div class="challenge-number" id="challengeNumber">課題 1</div>
                 <button class="btn-end" onclick="endPractice()">練習終了</button>
+            </div>
+            
+            <!-- 応援キャラクター（右上） -->
+            <div class="character-frame">
+                <img src="claude_ouendan.gif" alt="応援団長クロードくん" id="characterImage">
             </div>
             
             <!-- 課題文字列（上部・大きく） -->
