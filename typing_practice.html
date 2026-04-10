@@ -130,6 +130,8 @@
             width: 300px;
             height: 300px;
             overflow: hidden;
+            z-index: 10;
+            pointer-events: none; /* クリックイベントを通過させる */
         }
         
         .character-frame img {
@@ -693,7 +695,7 @@
             
             <!-- 応援キャラクター（右上） -->
             <div class="character-frame">
-                <img src="claude_sprite.png" alt="応援団長クロードくん" id="characterImage" onerror="this.style.display='none'">
+                <img src="claude_sprite.png?v=2" alt="応援団長クロードくん" id="characterImage" onerror="this.style.display='none'">
             </div>
             
             <!-- 課題文字列（上部・大きく） -->
@@ -1582,3 +1584,4 @@
     </script>
 </body>
 </html>
+claude_sprite
