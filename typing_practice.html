@@ -128,21 +128,19 @@
             top: 80px;
             right: 20px;
             width: 300px;
-            height: 520px;
-            background: #f7f7f7;
-            border-radius: 15px;
-            padding: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            height: 300px;
             overflow: hidden;
         }
         
         .character-frame img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
+            width: 1200px;
+            height: 300px;
+            animation: sprite-animation 2s steps(4) infinite;
+        }
+        
+        @keyframes sprite-animation {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-1200px); }
         }
         
         /* 課題文字列 */
@@ -695,7 +693,7 @@
             
             <!-- 応援キャラクター（右上） -->
             <div class="character-frame">
-                <img src="claude_ouendan.gif" alt="応援団長クロードくん" id="characterImage" onerror="this.style.display='none'">
+                <img src="claude_sprite.png" alt="応援団長クロードくん" id="characterImage" onerror="this.style.display='none'">
             </div>
             
             <!-- 課題文字列（上部・大きく） -->
