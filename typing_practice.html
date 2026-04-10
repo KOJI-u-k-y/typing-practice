@@ -695,7 +695,7 @@
             
             <!-- 応援キャラクター（右上） -->
             <div class="character-frame">
-                <img src="claude_ouendan.gif" alt="応援団長クロードくん" id="characterImage">
+                <img src="claude_ouendan.gif" alt="応援団長クロードくん" id="characterImage" onerror="this.style.display='none'">
             </div>
             
             <!-- 課題文字列（上部・大きく） -->
@@ -1080,8 +1080,9 @@
         
         // 課題を読み込む
         function loadChallenge(index) {
-            const challenge = challenges[index];
-            challengeMainText = challenge.mainText || challenge.japanese;
+            try {
+                const challenge = challenges[index];
+                challengeMainText = challenge.mainText || challenge.japanese;
             
             // よみがな（スペースは残す）
             kanaDisplay = challenge.japanese;
@@ -1164,6 +1165,11 @@
                 `課題 ${index + 1} / ${challenges.length}`;
             
             updateUI();
+            
+            } catch (error) {
+                alert('課題読み込みエラー: ' + error.message);
+                console.error(error);
+            }
         }
         
         // 練習開始
