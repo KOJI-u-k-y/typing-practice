@@ -135,14 +135,35 @@
         }
         
         .character-frame img {
-            width: 1200px;
-            height: 300px;
-            animation: sprite-animation 2s steps(4) infinite;
+            display: none; /* 最初は非表示 */
         }
         
-        @keyframes sprite-animation {
+        .character-frame img.active {
+            display: block; /* activeクラスで表示 */
+        }
+        
+        /* クロードくん（4コマ） */
+        #claudeImage {
+            width: 1200px;
+            height: 300px;
+            animation: claude-animation 2s steps(4) infinite;
+        }
+        
+        @keyframes claude-animation {
             0% { transform: translateX(0); }
             100% { transform: translateX(-1200px); }
+        }
+        
+        /* アンシーちゃん（8コマ） */
+        #anthyImage {
+            width: 2400px;
+            height: 300px;
+            animation: anthy-animation 4s steps(8) infinite;
+        }
+        
+        @keyframes anthy-animation {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-2400px); }
         }
         
         /* 課題文字列 */
@@ -695,7 +716,8 @@
             
             <!-- 応援キャラクター（右上） -->
             <div class="character-frame" id="characterFrame">
-                <img src="claude_sprite.png?v=2" alt="" id="characterImage" onerror="document.getElementById('characterFrame').style.display='none'">
+                <img src="claude_sprite.png?v=2" alt="" id="claudeImage">
+                <img src="anthy_sprite.png?v=1" alt="" id="anthyImage">
             </div>
             
             <!-- 課題文字列（上部・大きく） -->
@@ -1148,6 +1170,20 @@
             
             // 課題終了フラグを下ろす（念のため）
             isChallengeEnding = false;
+            
+            // キャラクター切り替え（奇数課題=クロードくん、偶数課題=アンシーちゃん）
+            const claudeImg = document.getElementById('claudeImage');
+            const anthyImg = document.getElementById('anthyImage');
+            
+            if (index % 2 === 0) {
+                // 奇数課題（index=0,2,4...）→ クロードくん
+                claudeImg.classList.add('active');
+                anthyImg.classList.remove('active');
+            } else {
+                // 偶数課題（index=1,3,5...）→ アンシーちゃん
+                claudeImg.classList.remove('active');
+                anthyImg.classList.add('active');
+            }
             
             // 既存のタイマーがあれば停止
             if (timerIntervalId) {
