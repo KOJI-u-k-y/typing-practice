@@ -469,19 +469,20 @@
         }
         
         .result-rank-title {
-            font-size: 18px;
+            font-size: 16px;
             opacity: 0.9;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
         
         .result-rank-name {
-            font-size: 48px;
+            font-size: 32px;
             font-weight: bold;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
+            white-space: nowrap;
         }
         
         .result-rank-speed {
-            font-size: 20px;
+            font-size: 18px;
             opacity: 0.95;
         }
         
@@ -860,18 +861,18 @@
             <div class="result">
                 <h2>🎉 練習終了！</h2>
                 
-                <!-- 結果画像と統計を横並び -->
-                <div style="display: flex; gap: 30px; align-items: center; margin-bottom: 30px;">
+                <!-- ランク表示（上段・中央） -->
+                <div id="resultRank" class="result-rank" style="margin-bottom: 30px; max-width: 600px; margin-left: auto; margin-right: auto;"></div>
+                
+                <!-- 結果画像と統計を横並び（下段） -->
+                <div style="display: flex; gap: 30px; align-items: flex-start; justify-content: center;">
                     <!-- 左：結果画像 -->
                     <div style="flex-shrink: 0;">
                         <img id="resultImage" src="" alt="" style="width: 375px; height: 250px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
                     </div>
                     
                     <!-- 右：統計 -->
-                    <div style="flex: 1;">
-                        <!-- ランク表示 -->
-                        <div id="resultRank" class="result-rank" style="margin-bottom: 20px;"></div>
-                        
+                    <div style="flex-shrink: 0; width: 400px;">
                         <div class="result-stats">
                             <div class="result-stat">
                                 <div class="result-stat-label">クリア課題数</div>
