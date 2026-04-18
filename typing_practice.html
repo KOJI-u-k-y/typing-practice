@@ -703,7 +703,7 @@
             </div>
             
             <!-- 課題ファイル読込ボタン（大きく） -->
-            <div class="ready-message show" style="margin: 30px 0;">
+            <div class="ready-message show" style="margin: 30px 0 10px 0;">
                 <button style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 20px 50px; border-radius: 12px; font-size: 20px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4); transition: all 0.3s;" 
                         onclick="document.getElementById('fileInputStart').click()"
                         onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(102, 126, 234, 0.5)'"
@@ -713,14 +713,25 @@
                 <input type="file" id="fileInputStart" accept=".btc,.txt" onchange="loadChallengeFile(event)" style="display: none;">
             </div>
             
+            <!-- 何かキーを...（小さく） -->
+            <p class="ready-message show" id="readyMessage" style="font-size: 14px; color: #999; margin: 10px 0 30px 0;">何かキーを押すと練習が始まります</p>
+            
             <!-- 応援団紹介 -->
-            <div style="display: flex; gap: 40px; justify-content: center; margin: 30px 0;">
+            <div style="display: flex; gap: 20px; justify-content: center; align-items: center; margin: 30px 0;">
+                <!-- クロードくん -->
                 <div style="text-align: center;">
                     <div style="background: #f7f7f7; padding: 15px; border-radius: 10px; margin-bottom: 10px;">
                         <img src="claude_intro.png" alt="" style="width: 250px; height: 300px; border-radius: 8px;">
                     </div>
                     <div style="font-weight: bold; color: #667eea; font-size: 16px;">🎌 応援団長<br>クロードくん</div>
                 </div>
+                
+                <!-- 縦書き「二人の応援団」 -->
+                <div style="writing-mode: vertical-rl; font-size: 24px; font-weight: bold; color: #667eea; letter-spacing: 8px; padding: 0 20px;">
+                    二人の応援団
+                </div>
+                
+                <!-- アンシーちゃん -->
                 <div style="text-align: center;">
                     <div style="background: #f7f7f7; padding: 15px; border-radius: 10px; margin-bottom: 10px;">
                         <img src="anthy_intro.png" alt="" style="width: 250px; height: 300px; border-radius: 8px;">
@@ -728,9 +739,6 @@
                     <div style="font-weight: bold; color: #ff69b4; font-size: 16px;">📣 チアリーダー<br>アンシーちゃん</div>
                 </div>
             </div>
-            
-            <!-- 何かキーを...（小さく下部） -->
-            <p class="ready-message show" id="readyMessage" style="font-size: 14px; color: #999; margin-top: 20px;">何かキーを押すと練習が始まります</p>
         </div>
         
         <div id="gameArea" class="hidden">
